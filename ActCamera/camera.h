@@ -33,6 +33,10 @@ namespace act
             }
             basicImage = originalImage(ROIRect);
             noBackgroundImage = originalImage(ROIRect).clone();
+
+			cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
+			cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_BGR2HSV_FULL);
+
             getImage();
         }
 

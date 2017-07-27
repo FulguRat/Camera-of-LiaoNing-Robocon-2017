@@ -112,7 +112,8 @@ void act::Camera::getImage()
 		{
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
-			if ((pix[0] < 40 && pix[1] < 35 && pix[2] < 35) || (pix[0] > 100 && pix[1] > 120 && pix[2] > 60))
+			//white golf ball & black golf ball
+			if ((pix[0] > 155 && pix[1] < 75) || (pix[0] < 30 && pix[1] < 30 && pix[2] < 25))
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -126,7 +127,9 @@ void act::Camera::getImage()
 		for (auto j = 0; j < noBackgroundImage.cols; ++j)
 		{
 			auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
-			if (pix[0] > 45 && pix[1] > 45 && pix[2] < 35)
+
+			//field
+			if (pix[0] > 115 && pix[0] < 145 && pix[1] > 170 && pix[2] < 110)
 			{
 				if (!col_val[i].min)
 					col_val[i].min = j;
@@ -325,7 +328,7 @@ void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vecto
 		double borderXRight = 75.76f + 1.3f * (float)core.back().y;
 
 		//judge the number of golf ball in this connected component
-		if ((float)size.back() >= 0.4f * stdPixNum && (float)size.back() <= 1.3f * stdPixNum)
+		if ((float)size.back() >= 0.4f * stdPixNum && (float)size.back() <= 1.7f * stdPixNum)
 			incNum = 1;
 		else if ((float)size.back() > 1.4f * stdPixNum && (float)size.back() <= 2.0f * stdPixNum)
 			incNum = 2;
