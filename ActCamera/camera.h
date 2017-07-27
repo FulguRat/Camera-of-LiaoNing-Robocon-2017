@@ -4,14 +4,17 @@
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
+//by pixels
+//#define BY_PIXELS
+
 namespace act
 {
-    class Camera : public VCConfig
+	class Camera : public VCConfig
     {
     public:
         explicit Camera(char _id);
         Camera(const Camera &) = delete;
-        Camera &operator=(const Camera &) = delete;
+		Camera &operator=(const Camera &) = delete;
         virtual ~Camera() {}
 
         bool is_open() { return fd != -1; }
@@ -32,6 +35,8 @@ namespace act
             noBackgroundImage = originalImage(ROIRect).clone();
             getImage();
         }
+
+		void getImage();
 
         void setROIRect(const cv::Rect &r)
         {
@@ -60,7 +65,7 @@ namespace act
             int max = 0;
         };
 
-        void getImage();
+        
 
         void getBlackBinaryImage(cv::Mat &bin) const
         {
@@ -79,7 +84,7 @@ namespace act
             bin = gray > whiteThresoldValue;
         }
 
-        static void findConnectedComponents(const cv::Mat &binary, std::vector<int> &res);
+        static void findConnectedComponents(const cv::Mat &binary, std::vector<int> &size, std::vector<cv::Point> &core);
 
         static uint32_t getWhitePixNumber(const cv::Mat &binary);
 
@@ -93,7 +98,7 @@ namespace act
             cv::findContours(binary, contours, hie, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
         }
 
-        void areaSort(cv::Mat ballImage);
+		void areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core);
 
         int cols = 0;
         int rows = 0;
@@ -104,7 +109,8 @@ namespace act
     private:
         cv::VideoCapture videoCapture;
 
-        cv::Mat originalImage;
+		
+		cv::Mat originalImage;
         cv::Mat basicImage;
         cv::Mat noBackgroundImage;
         cv::Mat fieldCHImage;

@@ -28,47 +28,53 @@ uint32_t act::Camera::getWhitePixNumber(const cv::Mat &binary)
 	return counter;
 }
 
-void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int> &res)
+void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int> &size, std::vector<cv::Point> &core)
 {
 	auto bin = binary.clone();
 
 	std::vector<cv::Point> stk_white;
 	unsigned long long counter = 0;
+	unsigned long long coreX = 0;
+	unsigned long long coreY = 0;
 
 	for (auto i = 0; i < bin.rows; ++i)
 	{
 		for (auto j = 0; j < bin.cols; ++j)
 		{
+			//when find a point of ball, push it into stack stk_white
 			if (bin.ptr(i)[j] == 255)
 			{
 				bin.ptr(i)[j] = 150;
 				stk_white.push_back({j, i});
 			}
-			//else if(binary.ptr(i)[j] == )
 
+			//if find a white point connected, which means there are element in stk_white
 			while (!stk_white.empty())
 			{
 				auto pix = stk_white.back();
 				stk_white.pop_back();
 				counter++;
+				coreX += pix.x;
+				coreY += pix.y;
 
 				auto row_0 = pix.y - 1, row_1 = pix.y, row_2 = pix.y + 1;
 				auto col_0 = pix.x - 1, col_1 = pix.x, col_2 = pix.x + 1;
 
+				//pay attention to the usage of "do {} while(0)"
 #define __pass__(x, y)  do { bin.ptr(y)[x] = 150; stk_white.push_back({x, y}); } while (0)
-
+				//row_0
 				if (row_0 >= 0 && col_0 >= 0 && bin.ptr(row_0)[col_0] == 255)
 					__pass__(col_0, row_0);
 				if (row_0 >= 0 && bin.ptr(row_0)[col_1] == 255)
 					__pass__(col_1, row_0);
 				if (row_0 >= 0 && col_2 < bin.cols && bin.ptr(row_0)[col_2] == 255)
 					__pass__(col_2, row_0);
-
+				//row_1
 				if (col_0 >= 0 && bin.ptr(row_1)[col_0] == 255)
 					__pass__(col_0, row_1);
 				if (col_2 < bin.cols && bin.ptr(row_1)[col_1] == 255)
 					__pass__(col_1, row_1);
-
+				//row_2
 				if (row_2 < bin.rows && col_0 >= 0 && bin.ptr(row_2)[col_0] == 255)
 					__pass__(col_0, row_2);
 				if (row_2 < bin.rows && bin.ptr(row_2)[col_1] == 255)
@@ -77,9 +83,16 @@ void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int
 					__pass__(col_2, row_2);
 #undef __pass__
 			}
-			if (counter)
+			//push_back the core of connected components and the number of white point
+			if (counter > 20)
 			{
-				res.push_back(counter);
+				coreX /= counter;
+				coreY /= counter;
+				core.push_back(cv::Point(coreX, coreY));
+				coreX = 0;
+				coreY = 0;
+
+				size.push_back(counter);
 				counter = 0;
 			}
 		}
@@ -100,11 +113,12 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			if ((pix[0] < 40 && pix[1] < 35 && pix[2] < 35) || (pix[0] > 100 && pix[1] > 120 && pix[2] > 60))
-				*allBallImage.ptr<uchar>(i, j) = 225;
+				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
 		}
 	}
+	imshow("TrueAB", allBallImage);
 
 	//��ȡ����ͼ��
 	for (auto i = 0; i < noBackgroundImage.rows; ++i)
@@ -153,7 +167,7 @@ void act::Camera::getImage()
 		for (auto j = 0; j < noBackgroundImage.cols; j++)
 		{
 			if ((i < row_val[j].max && i > row_val[j].min) || (j > col_val[i].min && j < col_val[i].max))
-				*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {225, 225, 225};
+				*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {255, 255, 255};
 			else
 				*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
 
@@ -167,28 +181,28 @@ void act::Camera::getImage()
 	std::vector<cv::Point> contours;
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 		for (auto j = 0; j < noBackgroundImage.cols; j++)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 			{
 				contours.push_back({j, i});
 				break;
 			}
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 		for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 			{
 				contours.push_back({j, i});
 				break;
 			}
 	for (auto j = 0; j < noBackgroundImage.cols; j++)
 		for (auto i = 0; i < noBackgroundImage.rows; i++)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 			{
 				contours.push_back({j, i});
 				break;
 			}
 	for (auto j = 0; j < noBackgroundImage.cols; j++)
 		for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 			{
 				contours.push_back({j, i});
 				break;
@@ -215,43 +229,45 @@ void act::Camera::getImage()
 		for (auto j = 0; j < noBackgroundImage.cols; j++)
 		{
 			*allBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 		for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
 		{
 			*allBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 	for (auto j = 0; j < noBackgroundImage.cols; j++)
 		for (auto i = 0; i < noBackgroundImage.rows; i++)
 		{
 			*allBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 	for (auto j = 0; j < noBackgroundImage.cols; j++)
 		for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
 		{
 			*allBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 225)
+			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 
-	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5));
+	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
 	cv::morphologyEx(allBallImage, allBallImage, CV_MOP_CLOSE, element);
 
-	element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
-	cv::morphologyEx(allBallImage, allBallImage, CV_MOP_OPEN, element);
+	//element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
+	//cv::morphologyEx(allBallImage, allBallImage, CV_MOP_OPEN, element);
 
 	delete[] col_val;
 	delete[] row_val;
 }
 
-void act::Camera::areaSort(cv::Mat ballImage)
+void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core)
 {
+#ifdef BY_PIXELS
+
 	cv::line(ballImage, cv::Point(257.14, 0), cv::Point(0, 180), cv::Scalar(255));
 	cv::line(ballImage, cv::Point(75.76, 0), cv::Point(303, 175), cv::Scalar(255));
 
@@ -265,7 +281,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 		for (auto j = 0; j < ballImage.cols; j++)
 		{
-			if (*ballImage.ptr<uchar>(i, j) == 225)
+			if (*ballImage.ptr<uchar>(i, j) == 255)
 			{
 				if (j < borderXLeft)
 					areaLNum++;
@@ -292,4 +308,60 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	areaLNum = 0;
 	areaMNum = 0;
 	areaRNum = 0;
+
+#else
+
+	cv::line(ballImage, cv::Point(257.14, 0), cv::Point(0, 180), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(75.76, 0), cv::Point(303, 175), cv::Scalar(255));
+
+	int areaLNum = 0, areaMNum = 0, areaRNum = 0, incNum = 0;
+	int targetArea = 0;
+
+	while (!size.empty() && !core.empty())
+	{
+		float stdPixNum = 11.32f * (float)core.back().y - 1126.0f;
+
+		double borderXLeft = 257.14f - 1.43f * (float)core.back().y;
+		double borderXRight = 75.76f + 1.3f * (float)core.back().y;
+
+		//judge the number of golf ball in this connected component
+		if ((float)size.back() >= 0.4f * stdPixNum && (float)size.back() <= 1.3f * stdPixNum)
+			incNum = 1;
+		else if ((float)size.back() > 1.4f * stdPixNum && (float)size.back() <= 2.0f * stdPixNum)
+			incNum = 2;
+		else if ((float)size.back() > 2.0f * stdPixNum)
+			incNum = 3;
+		else
+			incNum = 0;
+
+		if ((float)core.back().x < borderXLeft)
+			areaLNum += incNum;
+		else if ((float)core.back().x > borderXRight)
+			areaRNum += incNum;
+		else
+			areaMNum += incNum;
+
+		incNum = 0;
+
+		size.pop_back();
+		core.pop_back();
+	}
+
+	//need better judging condition, fix me
+	if (areaLNum >= areaRNum && areaLNum > areaMNum)
+		targetArea = 1;
+	else if (areaMNum >= areaRNum && areaMNum >= areaLNum)
+		targetArea = 2;
+	else if (areaRNum >= areaLNum && areaRNum > areaMNum)
+		targetArea = 3;
+	else
+		targetArea = 2;
+
+	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   " << targetArea << std::endl;
+
+	areaLNum = 0;
+	areaMNum = 0;
+	areaRNum = 0;
+
+#endif
 }
