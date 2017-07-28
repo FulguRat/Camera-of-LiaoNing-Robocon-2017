@@ -322,17 +322,17 @@ void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vecto
 
 	while (!size.empty() && !core.empty())
 	{
-		float stdPixNum = 11.32f * (float)core.back().y - 1126.0f;
+		float stdPixNum = 8.90f * (float)core.back().y - 882.9f;
 
 		double borderXLeft = 257.14f - 1.43f * (float)core.back().y;
 		double borderXRight = 75.76f + 1.3f * (float)core.back().y;
 
 		//judge the number of golf ball in this connected component
-		if ((float)size.back() >= 0.4f * stdPixNum && (float)size.back() <= 1.7f * stdPixNum)
+		if ((float)size.back() >= 0.6f * stdPixNum && (float)size.back() <= 1.5f * stdPixNum)
 			incNum = 1;
-		else if ((float)size.back() > 1.4f * stdPixNum && (float)size.back() <= 2.0f * stdPixNum)
+		else if ((float)size.back() > 1.5f * stdPixNum && (float)size.back() <= 2.25f * stdPixNum)
 			incNum = 2;
-		else if ((float)size.back() > 2.0f * stdPixNum)
+		else if ((float)size.back() > 2.25f * stdPixNum)
 			incNum = 3;
 		else
 			incNum = 0;
