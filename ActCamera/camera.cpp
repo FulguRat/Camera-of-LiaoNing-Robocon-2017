@@ -113,7 +113,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[0] > 155 && pix[1] < 75) || (pix[0] < 30 && pix[1] < 30 && pix[2] < 25))
+			if ((pix[0] < 170 && pix[1] < 75) || (pix[0] < 180 && pix[1] < 160 && pix[2] < 30))
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -129,7 +129,7 @@ void act::Camera::getImage()
 			auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
 
 			//field
-			if (pix[0] > 115 && pix[0] < 145 && pix[1] > 170 && pix[2] < 110)
+			if (pix[0] > 115 && pix[0] < 145 && pix[1] > 90 && pix[2] < 145)
 			{
 				if (!col_val[i].min)
 					col_val[i].min = j;

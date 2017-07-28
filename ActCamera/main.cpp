@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
     act::Timestamp timer;
     while (1)
     {
-        __TIMER_PRINT__;
-        __TIMER_START__;
+        //__TIMER_PRINT__;
+        //__TIMER_START__;
 
 		//update frame
         cam0.update();
