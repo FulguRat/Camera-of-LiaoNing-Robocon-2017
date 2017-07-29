@@ -10,4 +10,7 @@ Golf ball recognition in LiaoNing robot contest 2017
 3. 补光灯选型
 4. 敌方车干扰问题
 5. 中央高空储藏室架子问题以及网兜内球的问题
+6. cmake管理工程
+7. 自整定白平衡
+
 

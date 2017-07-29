@@ -56,13 +56,6 @@ int main(int argc, char *argv[])
         cv::imshow("noBG", cam0.getNoBGImage());
         cv::imshow("FCH", cam0.getFieldCHImage());
 
-#ifdef BY_PIXELS
-
-        cam0.areaSort(cam0.getAllBallImage());
-        cv::imshow("AB", cam0.getAllBallImage());
-
-#else
-		
 		std::vector<int> CCSize;
 		std::vector<cv::Point> CCCore;
 		cam0.findConnectedComponents(cam0.getAllBallImage(), CCSize, CCCore);
@@ -79,8 +72,6 @@ int main(int argc, char *argv[])
 		//	CCCore.pop_back();
 		//}
 		//std::cout << std::endl;
-
-#endif
 
 		//if push down Esc, kill the progress
         if (cv::waitKey(10) == 27)

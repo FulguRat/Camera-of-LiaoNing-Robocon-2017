@@ -269,51 +269,6 @@ void act::Camera::getImage()
 
 void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core)
 {
-#ifdef BY_PIXELS
-
-	cv::line(ballImage, cv::Point(257.14, 0), cv::Point(0, 180), cv::Scalar(255));
-	cv::line(ballImage, cv::Point(75.76, 0), cv::Point(303, 175), cv::Scalar(255));
-
-	int areaLNum = 0, areaMNum = 0, areaRNum = 0;
-	int targetArea = 0;
-
-	for (auto i = 0; i < ballImage.rows; i++)
-	{
-		double borderXLeft = 257.14 - 1.43 * i;
-		double borderXRight = 75.76 + 1.3 * i;
-
-		for (auto j = 0; j < ballImage.cols; j++)
-		{
-			if (*ballImage.ptr<uchar>(i, j) == 255)
-			{
-				if (j < borderXLeft)
-					areaLNum++;
-				else if (j > borderXRight)
-					areaRNum++;
-				else
-					areaMNum++;
-			}
-		}
-	}
-
-	//need better judging condition, fix me
-	if (areaLNum >= areaRNum && areaLNum > areaMNum)
-		targetArea = 1;
-	else if (areaMNum >= areaRNum && areaMNum >= areaLNum)
-		targetArea = 2;
-	else if (areaRNum >= areaLNum && areaRNum > areaMNum)
-		targetArea = 3;
-	else
-		targetArea = 2;
-
-	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   " << targetArea << std::endl;
-
-	areaLNum = 0;
-	areaMNum = 0;
-	areaRNum = 0;
-
-#else
-
 	cv::line(ballImage, cv::Point(257.14, 0), cv::Point(0, 180), cv::Scalar(255));
 	cv::line(ballImage, cv::Point(75.76, 0), cv::Point(303, 175), cv::Scalar(255));
 
@@ -365,6 +320,4 @@ void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vecto
 	areaLNum = 0;
 	areaMNum = 0;
 	areaRNum = 0;
-
-#endif
 }
