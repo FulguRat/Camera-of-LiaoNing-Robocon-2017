@@ -4,9 +4,6 @@
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
-//by pixels
-//#define BY_PIXELS
-
 namespace act
 {
 	class Camera : public VCConfig
@@ -14,7 +11,7 @@ namespace act
     public:
         explicit Camera(char _id);
         Camera(const Camera &) = delete;
-		Camera &operator=(const Camera &) = delete;
+		Camera &operator = (const Camera &) = delete;
         virtual ~Camera() {}
 
         bool is_open() { return fd != -1; }
@@ -49,60 +46,36 @@ namespace act
             ROIRows = r.height;
         }
 
-        void setWhiteThresold(char val) { whiteThresoldValue = val; }
-        void setBlackThresold(char val) { blackThresoldValue = val; }
-
-        cv::Mat getOriginalImage() const { return originalImage; }
+        cv::Mat getOriginalImageROI() const { return originalImage(ROIRect); }
         cv::Mat getBasicImage() const { return basicImage; }
-        cv::Mat getAllBallImage() const { return allBallImage; }
-        cv::Mat getBinaryImage() const { return binaryImage; }
-        cv::Mat getNoBGImage() const { return noBackgroundImage; }
-        cv::Mat getFieldCHImage() const { return fieldCHImage; }
+		cv::Mat getAllBallImage() const { return allBallImage; }
+		cv::Mat getNoBGImage() const { return noBackgroundImage; }
+		cv::Mat getFieldCHImage() const { return fieldCHImage; }
+        cv::Mat getNoBGBallImage() const { return noBGBallImage; }    
+
+		void showImage() const
+		{
+			cv::imshow("ORG", originalImage(ROIRect));
+			cv::imshow("BSC", basicImage);
+			cv::imshow("AB", allBallImage);
+			cv::imshow("noBG", noBackgroundImage);
+			cv::imshow("FCH", fieldCHImage);
+			cv::imshow("noBGB", noBGBallImage);
+		}
 
         void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
 
-        struct min_max
-        {
-            min_max() {}
-            min_max(int _min, int _max) : min(_min), max(_max) {}
-            int min = 0;
-            int max = 0;
-        };
-
-        
-
-        void getBlackBinaryImage(cv::Mat &bin) const
-        {
-            cv::Mat gray;
-
-            cv::cvtColor(ROIImage, gray, cv::COLOR_BGR2GRAY);
-
-            bin = gray < blackThresoldValue;
-        }
-
-        void getWhiteBinaryImage(cv::Mat &bin) const
-        {
-            cv::Mat gray;
-
-            cv::cvtColor(ROIImage, gray, cv::COLOR_BGR2GRAY);
-            bin = gray > whiteThresoldValue;
-        }
-
         static void findConnectedComponents(const cv::Mat &binary, std::vector<int> &size, std::vector<cv::Point> &core);
 
-        static uint32_t getWhitePixNumber(const cv::Mat &binary);
-
-        void getContours(std::vector<std::vector<cv::Point>> &contours) const
-        {
-            std::vector<cv::Vec4i> hie;
-
-            cv::Mat binary;
-            getWhiteBinaryImage(binary);
-
-            cv::findContours(binary, contours, hie, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-        }
-
 		void areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core);
+
+		struct min_max
+		{
+			min_max() {}
+			min_max(int _min, int _max) : min(_min), max(_max) {}
+			int min = 0;
+			int max = 0;
+		};
 
         int cols = 0;
         int rows = 0;
@@ -112,20 +85,16 @@ namespace act
 
     private:
         cv::VideoCapture videoCapture;
-
 		
 		cv::Mat originalImage;
         cv::Mat basicImage;
+		cv::Mat allBallImage;
         cv::Mat noBackgroundImage;
         cv::Mat fieldCHImage;
-        cv::Mat binaryImage;
-        cv::Mat allBallImage;
+        cv::Mat noBGBallImage;
 
         cv::Mat ROIImage;
         cv::Rect ROIRect;
-
-        char whiteThresoldValue = 0;
-        char blackThresoldValue = 0;
 
         int usbNumber = 0;
     };

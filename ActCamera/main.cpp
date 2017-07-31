@@ -40,8 +40,7 @@ int main(int argc, char *argv[])
 	//initialization cam0
     cam0.setExposureValue(false, EXPOSURE_TIME);
     cam0.setROIRect(cv::Rect(0, 50, cam0.cols, cam0.rows - 50));
-    cam0.setWhiteThresold(WHITE_THRESOLD);
-    cam0.setBlackThresold(BLACK_THRESOLD);
+	cam0.setAutoWhiteBalance(1);
 
     act::Timestamp timer;
     while (1)
@@ -52,16 +51,10 @@ int main(int argc, char *argv[])
 		//update frame
         cam0.update();
 
-        cv::imshow("BSC", cam0.getBasicImage());
-        cv::imshow("noBG", cam0.getNoBGImage());
-        cv::imshow("FCH", cam0.getFieldCHImage());
-
 		std::vector<int> CCSize;
 		std::vector<cv::Point> CCCore;
-		cam0.findConnectedComponents(cam0.getAllBallImage(), CCSize, CCCore);
-
-		cam0.areaSort(cam0.getAllBallImage(), CCSize, CCCore);
-		cv::imshow("AB", cam0.getAllBallImage());
+		cam0.findConnectedComponents(cam0.getNoBGBallImage(), CCSize, CCCore);
+		cam0.areaSort(cam0.getNoBGBallImage(), CCSize, CCCore);
 
 		//while (!CCSize.empty() && !CCCore.empty())
 		//{
@@ -72,6 +65,9 @@ int main(int argc, char *argv[])
 		//	CCCore.pop_back();
 		//}
 		//std::cout << std::endl;
+
+		//show all images that have been used
+		cam0.showImage();
 
 		//if push down Esc, kill the progress
         if (cv::waitKey(10) == 27)

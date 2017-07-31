@@ -33,43 +33,46 @@ namespace act
         VCConfig &operator=(const VCConfig &) = delete;
         virtual ~VCConfig() {}
 
-		//brightness OK
-		void setBrightness(int32_t val) { __set__(V4L2_CID_BRIGHTNESS, val); }
+        //brightness OK
+        void setBrightness(int32_t val) { __set__(V4L2_CID_BRIGHTNESS, val); }
 
-		//contrast OK
-		void setContrast(int32_t val) { __set__(V4L2_CID_CONTRAST, val); }
+        //contrast OK
+        void setContrast(int32_t val) { __set__(V4L2_CID_CONTRAST, val); }
 
-		//saturation OK
-		void setSaturation(int32_t val) { __set__(V4L2_CID_SATURATION, val); }
+        //saturation OK
+        void setSaturation(int32_t val) { __set__(V4L2_CID_SATURATION, val); }
 
-		//hue OK
-		void setHue(int32_t val) { __set__(V4L2_CID_HUE, val); }
+        //hue OK
+        void setHue(int32_t val) { __set__(V4L2_CID_HUE, val); }
 
-		//sharpness OK
-		void setSharpness(int32_t val) { __set__(V4L2_CID_SHARPNESS, val); }
+        //sharpness OK
+        void setSharpness(int32_t val) { __set__(V4L2_CID_SHARPNESS, val); }
 
-		//gain NO
-		void setGain(int32_t val) { __set__(V4L2_CID_GAIN, val); }
+        //gain NO
+        void setGain(int32_t val) { __set__(V4L2_CID_GAIN, val); }
 
-		//gamma OK
-		void setGamma(int32_t val) { __set__(V4L2_CID_GAMMA, val); }
+        //gamma OK
+        void setGamma(int32_t val) { __set__(V4L2_CID_GAMMA, val); }
 
-		//exposure value OK
-		void setExposureValue(bool isAuto, int32_t val = 300) {
-			if (isAuto) {
-				__set__(V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_APERTURE_PRIORITY);
-			}
-			else {
-				__set__(V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL);
-				__set__(V4L2_CID_EXPOSURE_ABSOLUTE, val);
-			}
-		}
+        //exposure value OK
+        void setExposureValue(bool isAuto, int32_t val = 300)
+        {
+            if (isAuto)
+            {
+                __set__(V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_APERTURE_PRIORITY);
+            }
+            else
+            {
+                __set__(V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL);
+                __set__(V4L2_CID_EXPOSURE_ABSOLUTE, val);
+            }
+        }
 
-		//White Balance
-		void setAutoWhiteBalance(bool val) { __set__(V4L2_CID_AUTO_WHITE_BALANCE, val ? 1 : 0); }
-		void setWhiteBalanceValue(int32_t val) { __set__(V4L2_CID_WHITE_BALANCE_TEMPERATURE, val); }
+        //White Balance
+        void setAutoWhiteBalance(bool val) { __set__(V4L2_CID_AUTO_WHITE_BALANCE, val ? 1 : 0); }
+        void setWhiteBalanceValue(int32_t val) { __set__(V4L2_CID_WHITE_BALANCE_TEMPERATURE, val); }
 
-		//focusing invalid
+        //focusing invalid
 
     protected:
         int32_t fd = 0;

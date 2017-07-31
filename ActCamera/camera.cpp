@@ -18,22 +18,12 @@ act::Camera::Camera(char _id) : VCConfig(_id)
 	}
 }
 
-uint32_t act::Camera::getWhitePixNumber(const cv::Mat &binary)
-{
-	uint32_t counter = 0;
-	for (int i = binary.cols * binary.rows - 1; i > 0; --i)
-		if (binary.data[i] == 255)
-			counter++;
-
-	return counter;
-}
-
 void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int> &size, std::vector<cv::Point> &core)
 {
 	auto bin = binary.clone();
 
 	std::vector<cv::Point> stk_white;
-	unsigned long long counter = 0;
+	unsigned int counter = 0;
 	unsigned long long coreX = 0;
 	unsigned long long coreY = 0;
 
@@ -88,7 +78,7 @@ void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int
 			{
 				coreX /= counter;
 				coreY /= counter;
-				core.push_back(cv::Point(coreX, coreY));
+				core.push_back(cv::Point((int)coreX, (int)coreY));
 				coreX = 0;
 				coreY = 0;
 
@@ -104,7 +94,7 @@ void act::Camera::getImage()
 	auto col_val = new min_max[basicImage.rows];
 	auto row_val = new min_max[basicImage.cols];
 
-	//��ȡ�����������ͼ��
+	//get all objects that are black and white
 	allBallImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
 	for (auto i = 0; i < basicImage.rows; i++)
 	{
@@ -119,16 +109,15 @@ void act::Camera::getImage()
 				*allBallImage.ptr<uchar>(i, j) = 0;
 		}
 	}
-	imshow("TrueAB", allBallImage);
 
-	//��ȡ����ͼ��
+	//get the contours value of the green field
 	for (auto i = 0; i < noBackgroundImage.rows; ++i)
 	{
 		for (auto j = 0; j < noBackgroundImage.cols; ++j)
 		{
 			auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
 
-			//field
+			//green field
 			if (pix[0] > 115 && pix[0] < 145 && pix[1] > 90 && pix[2] < 145)
 			{
 				if (!col_val[i].min)
@@ -141,7 +130,7 @@ void act::Camera::getImage()
 			}
 		}
 	}
-
+	//fill the vacancy in green field nearby the border
 	for (auto i = 0; i < noBackgroundImage.rows; ++i)
 	{
 		for (auto j = 0; j < noBackgroundImage.cols; ++j)
@@ -164,7 +153,7 @@ void act::Camera::getImage()
 		}
 	}
 
-	//����Ϊ������Ϊ��
+	//transform the field white and the others black, convert the image to gray image
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 	{
 		for (auto j = 0; j < noBackgroundImage.cols; j++)
@@ -180,7 +169,7 @@ void act::Camera::getImage()
 	}
 	cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_RGB2GRAY);
 
-	//ȡ��Ե
+	//find contours
 	std::vector<cv::Point> contours;
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 		for (auto j = 0; j < noBackgroundImage.cols; j++)
@@ -211,7 +200,7 @@ void act::Camera::getImage()
 				break;
 			}
 
-	//��ȡ͹��,need to get the largest ConvexHull, fix me
+	//get convex hull of the field
 	fieldCHImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
 	if (contours.size() > 0)
 	{
@@ -228,40 +217,43 @@ void act::Camera::getImage()
 		}
 	}
 
+	//delete the part outside the convex hull of allBallImage
+	noBGBallImage = allBallImage.clone();
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 		for (auto j = 0; j < noBackgroundImage.cols; j++)
 		{
-			*allBallImage.ptr<uchar>(i, j) = 0;
+			*noBGBallImage.ptr<uchar>(i, j) = 0;
 			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 	for (auto i = 0; i < noBackgroundImage.rows; i++)
 		for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
 		{
-			*allBallImage.ptr<uchar>(i, j) = 0;
+			*noBGBallImage.ptr<uchar>(i, j) = 0;
 			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 	for (auto j = 0; j < noBackgroundImage.cols; j++)
 		for (auto i = 0; i < noBackgroundImage.rows; i++)
 		{
-			*allBallImage.ptr<uchar>(i, j) = 0;
+			*noBGBallImage.ptr<uchar>(i, j) = 0;
 			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 	for (auto j = 0; j < noBackgroundImage.cols; j++)
 		for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
 		{
-			*allBallImage.ptr<uchar>(i, j) = 0;
+			*noBGBallImage.ptr<uchar>(i, j) = 0;
 			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
 
-	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
-	cv::morphologyEx(allBallImage, allBallImage, CV_MOP_CLOSE, element);
+	//image processing of allBallImage
+	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+	cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
 
 	//element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
-	//cv::morphologyEx(allBallImage, allBallImage, CV_MOP_OPEN, element);
+	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_OPEN, element);
 
 	delete[] col_val;
 	delete[] row_val;
@@ -269,8 +261,8 @@ void act::Camera::getImage()
 
 void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core)
 {
-	cv::line(ballImage, cv::Point(257.14, 0), cv::Point(0, 180), cv::Scalar(255));
-	cv::line(ballImage, cv::Point(75.76, 0), cv::Point(303, 175), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(257, 0), cv::Point(0  , 180), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(76 , 0), cv::Point(303, 175), cv::Scalar(255));
 
 	int areaLNum = 0, areaMNum = 0, areaRNum = 0, incNum = 0;
 	int targetArea = 0;
