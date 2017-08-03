@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include "camera.h"
-
 act::Camera::Camera(char _id) : VCConfig(_id)
 {
 	if (fd != -1)
@@ -89,6 +88,79 @@ void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int
 	}
 }
 
+void act::Camera::autoSet()
+{
+	int averageBGR[3] = { 0 };
+	int refPointCounter = 0;
+	int minBGR = 0;
+	int initCounter = 3;
+
+	//set brightness
+	do
+	{
+		//adjust brightness
+		if (minBGR < 100 && initCounter == 0) { brightness += 10; }
+		else if (minBGR >= 100 && minBGR < 130 && initCounter == 0) { brightness++; }
+
+		else if (minBGR > 170 && initCounter == 0) { brightness -= 10; }
+		else if (minBGR <= 170 && minBGR > 140 && initCounter == 0) { brightness--; }
+
+		else if (initCounter > 0) { initCounter--; }
+		else { break; }
+
+		setBrightness(brightness);
+
+		averageBGR[0] = 0;
+		averageBGR[1] = 0;
+		averageBGR[2] = 0;
+		refPointCounter = 0;
+
+		//update original image
+		update();
+		imshow("ORIGINAL", getOriginalImageROI());
+		//get RGB value of white area
+		for (int i = 170; i < basicImage.rows; i++)
+		{
+			for (int j = 300; j < basicImage.cols; j++)
+			{
+				auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
+
+				averageBGR[0] += pix[0];
+				averageBGR[1] += pix[1];
+				averageBGR[2] += pix[2];
+
+				refPointCounter++;
+			}
+		}
+		averageBGR[0] /= refPointCounter;
+		averageBGR[1] /= refPointCounter;
+		averageBGR[2] /= refPointCounter;
+
+		//find the minimal value of BGR
+		minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
+		minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
+		
+		std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
+			<< brightness << "   " << minBGR << std::endl;
+
+		//if push down Esc, kill the progress
+		if (cv::waitKey(10) == 27)
+		{
+			break;
+		}
+	} while ((minBGR < 130 || minBGR > 140) || initCounter > 0);
+
+	std::cout << "Auto set brightness done" << std::endl;
+
+	//set white balance
+	gainBGR[0] = (float)minBGR / (float)averageBGR[0];
+	gainBGR[1] = (float)minBGR / (float)averageBGR[1];
+	gainBGR[2] = (float)minBGR / (float)averageBGR[2];
+
+	std::cout << gainBGR[0] << "   " << gainBGR[1] << "   " << gainBGR[2] << std::endl;
+	std::cout << "Auto set white balance done" << std::endl;
+}
+
 void act::Camera::getImage()
 {
 	auto col_val = new min_max[basicImage.rows];
@@ -103,14 +175,14 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[0] < 170 && pix[1] < 75) || (pix[0] < 180 && pix[1] < 160 && pix[2] < 30))
+			if ((pix[0] > 60 && pix[0] < 160 && pix[1] < 120 && pix[2] > 50 && pix[2] < 130) || 
+				(pix[0] > 70 && pix[0] < 100 && pix[1] > 60 && pix[1] < 90 && pix[2] > 30 && pix[2] < 70))
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
 		}
 	}
 
-	//get the contours value of the green field
 	for (auto i = 0; i < noBackgroundImage.rows; ++i)
 	{
 		for (auto j = 0; j < noBackgroundImage.cols; ++j)
@@ -118,7 +190,7 @@ void act::Camera::getImage()
 			auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field
-			if (pix[0] > 115 && pix[0] < 145 && pix[1] > 90 && pix[2] < 145)
+			if (pix[0] > 90 && pix[0] < 130 && pix[1] > 110 && pix[1] < 180 && pix[2] > 45 && pix[2] < 115)
 			{
 				if (!col_val[i].min)
 					col_val[i].min = j;
@@ -249,7 +321,7 @@ void act::Camera::getImage()
 		}
 
 	//image processing of allBallImage
-	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
 	cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
 
 	//element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));

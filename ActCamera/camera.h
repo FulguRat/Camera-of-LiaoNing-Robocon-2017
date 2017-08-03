@@ -16,6 +16,8 @@ namespace act
 
         bool is_open() { return fd != -1; }
 
+		void autoSet();
+
         void update()
         {
             cv::Mat temp;
@@ -25,16 +27,23 @@ namespace act
             {
                 for (auto j = 0; j < temp.cols; ++j)
                 {
-                    originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
+					originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
+					auto pix = originalImage.ptr<cv::Vec3b>(i)[j];
+
+					//set BGR gain of original image
+					originalImage.ptr<cv::Vec3b>(i)[j][0] = (uchar)((float)pix[0] * gainBGR[0]);
+					originalImage.ptr<cv::Vec3b>(i)[j][1] = (uchar)((float)pix[1] * gainBGR[1]);
+					originalImage.ptr<cv::Vec3b>(i)[j][2] = (uchar)((float)pix[2] * gainBGR[2]);
                 }
             }
-            basicImage = originalImage(ROIRect);
-            noBackgroundImage = originalImage(ROIRect).clone();
 
+			//get basic image for later handle
+			basicImage = originalImage(ROIRect).clone();
 			cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
-			cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_BGR2HSV_FULL);
 
-            getImage();
+			//get the contours value of the green field
+			noBackgroundImage = originalImage(ROIRect).clone();
+			cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_BGR2HSV_FULL);
         }
 
 		void getImage();
@@ -95,6 +104,9 @@ namespace act
 
         cv::Mat ROIImage;
         cv::Rect ROIRect;
+
+		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
+		int brightness = 0;
 
         int usbNumber = 0;
     };
