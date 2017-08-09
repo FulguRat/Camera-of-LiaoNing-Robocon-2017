@@ -18,7 +18,7 @@ act::Camera::Camera(char _id) : VCConfig(_id)
 	}
 }
 
-void act::Camera::findConnectedComponents(cv::Mat &binary)
+void act::Camera::findConnectedComponents(const cv::Mat &binary)
 {
 	auto bin = binary.clone();
 

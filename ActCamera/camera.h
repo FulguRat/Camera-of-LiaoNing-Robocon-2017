@@ -66,7 +66,7 @@ namespace act
 
         void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
 
-        void findConnectedComponents(cv::Mat &binary);
+        void findConnectedComponents(const cv::Mat &binary);
 
 		void areaSort(cv::Mat ballImage);
 
