@@ -28,22 +28,14 @@ namespace act
                 for (auto j = 0; j < temp.cols; ++j)
                 {
 					originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
-					auto pix = originalImage.ptr<cv::Vec3b>(i)[j];
+					//auto pix = originalImage.ptr<cv::Vec3b>(i)[j];
 
-					//set BGR gain of original image
-					originalImage.ptr<cv::Vec3b>(i)[j][0] = (uchar)((float)pix[0] * gainBGR[0]);
-					originalImage.ptr<cv::Vec3b>(i)[j][1] = (uchar)((float)pix[1] * gainBGR[1]);
-					originalImage.ptr<cv::Vec3b>(i)[j][2] = (uchar)((float)pix[2] * gainBGR[2]);
+					////set BGR gain of original image
+					//originalImage.ptr<cv::Vec3b>(i)[j][0] = (uchar)((float)pix[0] * gainBGR[0]);
+					//originalImage.ptr<cv::Vec3b>(i)[j][1] = (uchar)((float)pix[1] * gainBGR[1]);
+					//originalImage.ptr<cv::Vec3b>(i)[j][2] = (uchar)((float)pix[2] * gainBGR[2]);
                 }
             }
-
-			//get basic image for later handle
-			basicImage = originalImage(ROIRect).clone();
-			cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
-
-			//get the contours value of the green field
-			noBackgroundImage = originalImage(ROIRect).clone();
-			cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_BGR2HSV_FULL);
         }
 
 		void getImage();
@@ -74,9 +66,9 @@ namespace act
 
         void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
 
-        static void findConnectedComponents(const cv::Mat &binary, std::vector<int> &size, std::vector<cv::Point> &core);
+        void findConnectedComponents(cv::Mat &binary);
 
-		void areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core);
+		void areaSort(cv::Mat ballImage);
 
 		struct min_max
 		{
@@ -101,9 +93,17 @@ namespace act
         cv::Mat noBackgroundImage;
         cv::Mat fieldCHImage;
         cv::Mat noBGBallImage;
+		
+		std::vector<cv::Mat> BGRChannels;
+		cv::Mat blueImage;
+		cv::Mat greenImage;
+		cv::Mat redImage;
 
         cv::Mat ROIImage;
         cv::Rect ROIRect;
+
+		std::vector<int> CCSize;
+		std::vector<cv::Point> CCCore;
 
 		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
 		int brightness = 0;

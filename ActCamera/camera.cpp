@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include "camera.h"
+
 act::Camera::Camera(char _id) : VCConfig(_id)
 {
 	if (fd != -1)
@@ -17,7 +18,7 @@ act::Camera::Camera(char _id) : VCConfig(_id)
 	}
 }
 
-void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int> &size, std::vector<cv::Point> &core)
+void act::Camera::findConnectedComponents(cv::Mat &binary)
 {
 	auto bin = binary.clone();
 
@@ -77,11 +78,11 @@ void act::Camera::findConnectedComponents(const cv::Mat &binary, std::vector<int
 			{
 				coreX /= counter;
 				coreY /= counter;
-				core.push_back(cv::Point((int)coreX, (int)coreY));
+				CCCore.push_back(cv::Point((int)coreX, (int)coreY));
 				coreX = 0;
 				coreY = 0;
 
-				size.push_back(counter);
+				CCSize.push_back(counter);
 				counter = 0;
 			}
 		}
@@ -119,9 +120,9 @@ void act::Camera::autoSet()
 		update();
 		imshow("ORIGINAL", getOriginalImageROI());
 		//get RGB value of white area
-		for (int i = 170; i < basicImage.rows; i++)
+		for (int i = 170; i < originalImage(ROIRect).rows; i++)
 		{
-			for (int j = 300; j < basicImage.cols; j++)
+			for (int j = 300; j < originalImage(ROIRect).cols; j++)
 			{
 				auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
 
@@ -163,8 +164,29 @@ void act::Camera::autoSet()
 
 void act::Camera::getImage()
 {
-	auto col_val = new min_max[basicImage.rows];
-	auto row_val = new min_max[basicImage.cols];
+	auto col_val = new min_max[originalImage(ROIRect).rows];
+	auto row_val = new min_max[originalImage(ROIRect).cols];
+
+	////equalize hist
+	//cv::split(originalImage, BGRChannels);
+
+	//blueImage = BGRChannels.at(0);
+	//greenImage = BGRChannels.at(1);
+	//redImage = BGRChannels.at(2);
+
+	//cv::equalizeHist(blueImage , blueImage );
+	//cv::equalizeHist(greenImage, greenImage);
+	//cv::equalizeHist(redImage  , redImage  );
+
+	//cv::merge(BGRChannels, originalImage);
+
+	//get basic image for later handle
+	basicImage = originalImage(ROIRect).clone();
+	cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
+
+	//get the contours value of the green field
+	noBackgroundImage = originalImage(ROIRect).clone();
+	cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_BGR2HSV_FULL);
 
 	//get all objects that are black and white
 	allBallImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
@@ -175,8 +197,8 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[0] > 60 && pix[0] < 160 && pix[1] < 120 && pix[2] > 50 && pix[2] < 130) || 
-				(pix[0] > 70 && pix[0] < 100 && pix[1] > 60 && pix[1] < 90 && pix[2] > 30 && pix[2] < 70))
+			if ((/*pix[0] > 60 && pix[0] < 160 && */pix[1] < 100 && pix[2] > 100/* && pix[2] < 130*/) || 
+				(/*pix[0] > 70 && */pix[0] < 140 &&/* pix[1] > 60 && pix[1] < 90 && pix[2] > 30 && */pix[2] < 25))
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -189,8 +211,9 @@ void act::Camera::getImage()
 		{
 			auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
 
-			//green field
-			if (pix[0] > 90 && pix[0] < 130 && pix[1] > 110 && pix[1] < 180 && pix[2] > 45 && pix[2] < 115)
+			//green / orange / blue / redfield
+			if ((pix[0] > 100 && pix[0] < 140 && pix[1] > 100 &&/* pix[1] < 180 && */pix[2] > 25 && pix[2] < 160) ||
+				(pix[0] < 30  && pix[1] > 230 && pix[2] > 60 && pix[2] < 130))
 			{
 				if (!col_val[i].min)
 					col_val[i].min = j;
@@ -291,34 +314,37 @@ void act::Camera::getImage()
 
 	//delete the part outside the convex hull of allBallImage
 	noBGBallImage = allBallImage.clone();
-	for (auto i = 0; i < noBackgroundImage.rows; i++)
-		for (auto j = 0; j < noBackgroundImage.cols; j++)
+	for (auto i = 0; i < fieldCHImage.rows; i++)
+		for (auto j = 0; j < fieldCHImage.cols; j++)
 		{
 			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
-	for (auto i = 0; i < noBackgroundImage.rows; i++)
-		for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
+	for (auto i = 0; i < fieldCHImage.rows; i++)
+		for (auto j = fieldCHImage.cols - 1; j >= 0; j--)
 		{
 			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
-	for (auto j = 0; j < noBackgroundImage.cols; j++)
-		for (auto i = 0; i < noBackgroundImage.rows; i++)
+	for (auto j = 0; j < fieldCHImage.cols; j++)
+		for (auto i = 0; i < fieldCHImage.rows; i++)
 		{
 			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
-	for (auto j = 0; j < noBackgroundImage.cols; j++)
-		for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
+	for (auto j = 0; j < fieldCHImage.cols; j++)
+		for (auto i = fieldCHImage.rows - 1; i >= 0; i--)
 		{
 			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
+
+	//insert function of deleting oversize and undersize connected components here
+
 
 	//image processing of allBallImage
 	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
@@ -331,42 +357,42 @@ void act::Camera::getImage()
 	delete[] row_val;
 }
 
-void act::Camera::areaSort(cv::Mat ballImage, std::vector<int> &size, std::vector<cv::Point> &core)
+void act::Camera::areaSort(cv::Mat ballImage)
 {
-	cv::line(ballImage, cv::Point(257, 0), cv::Point(0  , 180), cv::Scalar(255));
-	cv::line(ballImage, cv::Point(76 , 0), cv::Point(303, 175), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(128, 0), cv::Point(0  , 90), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(193, 0), cv::Point(320, 98), cv::Scalar(255));
 
 	int areaLNum = 0, areaMNum = 0, areaRNum = 0, incNum = 0;
 	int targetArea = 0;
 
-	while (!size.empty() && !core.empty())
+	while (!CCSize.empty() && !CCCore.empty())
 	{
-		float stdPixNum = 8.90f * (float)core.back().y - 882.9f;
+		float stdPixNum = 10.13f * (float)CCCore.back().y - 128.30f;
 
-		double borderXLeft = 257.14f - 1.43f * (float)core.back().y;
-		double borderXRight = 75.76f + 1.3f * (float)core.back().y;
+		double borderXLeft = 128.44f - 1.43f * (float)CCCore.back().y;
+		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
 
 		//judge the number of golf ball in this connected component
-		if ((float)size.back() >= 0.6f * stdPixNum && (float)size.back() <= 1.5f * stdPixNum)
+		if ((float)CCSize.back() >= 0.6f * stdPixNum && (float)CCSize.back() <= 1.5f * stdPixNum)
 			incNum = 1;
-		else if ((float)size.back() > 1.5f * stdPixNum && (float)size.back() <= 2.25f * stdPixNum)
+		else if ((float)CCSize.back() > 1.5f * stdPixNum && (float)CCSize.back() <= 2.25f * stdPixNum)
 			incNum = 2;
-		else if ((float)size.back() > 2.25f * stdPixNum)
+		else if ((float)CCSize.back() > 2.25f * stdPixNum)
 			incNum = 3;
 		else
 			incNum = 0;
-
-		if ((float)core.back().x < borderXLeft)
+		
+		if ((float)CCCore.back().x < borderXLeft)
 			areaLNum += incNum;
-		else if ((float)core.back().x > borderXRight)
+		else if ((float)CCCore.back().x > borderXRight)
 			areaRNum += incNum;
 		else
 			areaMNum += incNum;
 
 		incNum = 0;
 
-		size.pop_back();
-		core.pop_back();
+		CCSize.pop_back();
+		CCCore.pop_back();
 	}
 
 	//need better judging condition, fix me
