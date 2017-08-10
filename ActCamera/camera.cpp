@@ -87,6 +87,16 @@ void act::Camera::findConnectedComponents(const cv::Mat &binary)
 			}
 		}
 	}
+	//test reference pix num of specific y
+	while (!CCSize.empty() && !CCCore.empty())
+	{
+		std::cout << CCSize.back() << "  ";
+		std::cout << CCCore.back() << "  ";
+
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
+	std::cout << std::endl;
 }
 
 void act::Camera::autoSet()
@@ -251,8 +261,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((/*pix[0] > 60 && pix[0] < 160 && */pix[1] < 100 && pix[2] > 100/* && pix[2] < 130*/) || 
-				(/*pix[0] > 70 && */pix[0] < 140 &&/* pix[1] > 60 && pix[1] < 90 && pix[2] > 30 && */pix[2] < 25))
+			if (pix[2] > 180 || pix[2] < 70)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -268,7 +277,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field, should add orange/red/blue, fix me
-			if (pix[0] > 100 && pix[0] < 130 && /*pix[1] > 60 && pix[1] < 100 && */pix[2] > 0 && pix[2] < 120)
+			if ((pix[0] > 95 && pix[0] < 130)/*(pix[0] > 105 && pix[0] < 140)*/)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;

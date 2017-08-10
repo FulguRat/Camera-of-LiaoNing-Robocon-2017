@@ -45,8 +45,8 @@ int main(int argc, char *argv[])
     }
 
 	//initialization cam0
-    cam0.setExposureValue(false, EXPOSURE_TIME);
-	//cam0.setExposureValue(true);
+    //cam0.setExposureValue(false, EXPOSURE_TIME);
+	cam0.setExposureValue(true);
     cam0.setROIRect(cv::Rect(0, __rows_took_out, cam0.cols, cam0.rows - __rows_took_out));
 	//cam0.setBrightness(0);
 	//cam0.setExposureValue(false, 0);
@@ -76,17 +76,6 @@ int main(int argc, char *argv[])
 		cam0.getImage();
 
 		cam0.findConnectedComponents(cam0.getNoBGBallImage());	
-
-		////test reference pix num of specific y
-		//while (!CCSize.empty() && !CCCore.empty())
-		//{
-		//	std::cout << CCSize.back() << "  ";
-		//	std::cout << CCCore.back() << "  ";
-
-		//	CCSize.pop_back();
-		//	CCCore.pop_back();
-		//}
-		//std::cout << std::endl;
 
 		//cam0.areaSort(cam0.getNoBGBallImage());
 
