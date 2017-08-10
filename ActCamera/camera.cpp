@@ -259,110 +259,150 @@ void act::Camera::getImage()
 		}
 	}
 
-	for (auto i = 0; i < noBackgroundImage.rows; ++i)
+	//get all objects that are green
+	allGreenImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+	for (auto i = 0; i < basicImage.rows; i++)
 	{
-		for (auto j = 0; j < noBackgroundImage.cols; ++j)
+		for (auto j = 0; j < basicImage.cols; j++)
 		{
-			auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
+			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
-			//green / orange / blue / redfield
-			if ((pix[0] > 100 && pix[0] < 140 && pix[1] > 100 &&/* pix[1] < 180 && */pix[2] > 25 && pix[2] < 160) ||
-				(pix[0] < 30  && pix[1] > 230 && pix[2] > 60 && pix[2] < 130))
-			{
-				if (!col_val[i].min)
-					col_val[i].min = j;
-				col_val[i].max = j;
-
-				if (!row_val[j].min)
-					row_val[j].min = i;
-				row_val[j].max = i;
-			}
-		}
-	}
-	//fill the vacancy in green field nearby the border
-	for (auto i = 0; i < noBackgroundImage.rows; ++i)
-	{
-		for (auto j = 0; j < noBackgroundImage.cols; ++j)
-		{
-			if ((i < row_val[j].max && i > row_val[j].min) && (col_val[i].max - col_val[i].min > 100))
-			{
-				if (col_val[i].min > j)
-					col_val[i].min = j;
-				if (col_val[i].max < j)
-					col_val[i].max = j;
-			}
-
-			if ((j > col_val[i].min && j < col_val[i].max) && (row_val[j].max - row_val[j].min > 100))
-			{
-				if (row_val[j].max < i)
-					row_val[j].max = i;
-				if (row_val[j].min > i)
-					row_val[j].min = i;
-			}
-		}
-	}
-
-	//transform the field white and the others black, convert the image to gray image
-	for (auto i = 0; i < noBackgroundImage.rows; i++)
-	{
-		for (auto j = 0; j < noBackgroundImage.cols; j++)
-		{
-			if ((i < row_val[j].max && i > row_val[j].min) || (j > col_val[i].min && j < col_val[i].max))
-				*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {255, 255, 255};
+			//green field, should add orange/red/blue, fix me
+			if (pix[0] > 100 && pix[0] < 130 && /*pix[1] > 60 && pix[1] < 100 && */pix[2] > 0 && pix[2] < 120)
+				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
-				*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
-
-			if (i == 0 || i == noBackgroundImage.rows - 1 || j == 0 || j == noBackgroundImage.cols - 1)
-				*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
+				*allGreenImage.ptr<uchar>(i, j) = 0;
 		}
 	}
-	cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_RGB2GRAY);
 
-	//find contours
-	std::vector<cv::Point> contours;
-	for (auto i = 0; i < noBackgroundImage.rows; i++)
-		for (auto j = 0; j < noBackgroundImage.cols; j++)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-			{
-				contours.push_back({j, i});
-				break;
-			}
-	for (auto i = 0; i < noBackgroundImage.rows; i++)
-		for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-			{
-				contours.push_back({j, i});
-				break;
-			}
-	for (auto j = 0; j < noBackgroundImage.cols; j++)
-		for (auto i = 0; i < noBackgroundImage.rows; i++)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-			{
-				contours.push_back({j, i});
-				break;
-			}
-	for (auto j = 0; j < noBackgroundImage.cols; j++)
-		for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
-			if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-			{
-				contours.push_back({j, i});
-				break;
-			}
+	//findContours
+	size_t maxCtsSize = 0;
+	int maxCtsNumber = 0;
+
+	fieldCtsImage = allGreenImage.clone();
+	cv::findContours(fieldCtsImage, fieldContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
+	for (size_t i = 0; i < fieldContours.size(); i++)
+	{
+		if (fieldContours[i].size() > maxCtsSize)
+		{
+			maxCtsSize = fieldContours[i].size();
+			maxCtsNumber = i;
+		}
+	}
+
+	int CtsCount = fieldContours[maxCtsNumber].size();
+	cv::Point point0Cts = fieldContours[maxCtsNumber][CtsCount - 1];
+	for (int i = 0; i < CtsCount; i++)
+	{
+		cv::Point pointCts = fieldContours[maxCtsNumber][i];
+		cv::line(fieldCtsImage, point0Cts, pointCts, cv::Scalar(255));
+		point0Cts = pointCts;
+	}
+
+	//for (auto i = 0; i < noBackgroundImage.rows; ++i)
+	//{
+	//	for (auto j = 0; j < noBackgroundImage.cols; ++j)
+	//	{
+	//		auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
+
+	//		//green / orange / blue / redfield
+	//		if ((pix[0] > 100 && pix[0] < 140 && pix[1] > 100 &&/* pix[1] < 180 && */pix[2] > 25 && pix[2] < 160) ||
+	//			(pix[0] < 30  && pix[1] > 230 && pix[2] > 60 && pix[2] < 130))
+	//		{
+	//			if (!col_val[i].min)
+	//				col_val[i].min = j;
+	//			col_val[i].max = j;
+
+	//			if (!row_val[j].min)
+	//				row_val[j].min = i;
+	//			row_val[j].max = i;
+	//		}
+	//	}
+	//}
+	////fill the vacancy in green field nearby the border
+	//for (auto i = 0; i < noBackgroundImage.rows; ++i)
+	//{
+	//	for (auto j = 0; j < noBackgroundImage.cols; ++j)
+	//	{
+	//		if ((i < row_val[j].max && i > row_val[j].min) && (col_val[i].max - col_val[i].min > 100))
+	//		{
+	//			if (col_val[i].min > j)
+	//				col_val[i].min = j;
+	//			if (col_val[i].max < j)
+	//				col_val[i].max = j;
+	//		}
+
+	//		if ((j > col_val[i].min && j < col_val[i].max) && (row_val[j].max - row_val[j].min > 100))
+	//		{
+	//			if (row_val[j].max < i)
+	//				row_val[j].max = i;
+	//			if (row_val[j].min > i)
+	//				row_val[j].min = i;
+	//		}
+	//	}
+	//}
+
+	////transform the field white and the others black, convert the image to gray image
+	//for (auto i = 0; i < noBackgroundImage.rows; i++)
+	//{
+	//	for (auto j = 0; j < noBackgroundImage.cols; j++)
+	//	{
+	//		if ((i < row_val[j].max && i > row_val[j].min) || (j > col_val[i].min && j < col_val[i].max))
+	//			*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {255, 255, 255};
+	//		else
+	//			*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
+
+	//		if (i == 0 || i == noBackgroundImage.rows - 1 || j == 0 || j == noBackgroundImage.cols - 1)
+	//			*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
+	//	}
+	//}
+	//cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_RGB2GRAY);
+
+	////find contours
+	//std::vector<cv::Point> contours;
+	//for (auto i = 0; i < noBackgroundImage.rows; i++)
+	//	for (auto j = 0; j < noBackgroundImage.cols; j++)
+	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+	//		{
+	//			contours.push_back({j, i});
+	//			break;
+	//		}
+	//for (auto i = 0; i < noBackgroundImage.rows; i++)
+	//	for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
+	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+	//		{
+	//			contours.push_back({j, i});
+	//			break;
+	//		}
+	//for (auto j = 0; j < noBackgroundImage.cols; j++)
+	//	for (auto i = 0; i < noBackgroundImage.rows; i++)
+	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+	//		{
+	//			contours.push_back({j, i});
+	//			break;
+	//		}
+	//for (auto j = 0; j < noBackgroundImage.cols; j++)
+	//	for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
+	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
+	//		{
+	//			contours.push_back({j, i});
+	//			break;
+	//		}
 
 	//get convex hull of the field
 	fieldCHImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
-	if (contours.size() > 0)
+	if (CtsCount > 0)
 	{
 		std::vector<cv::Point> hull;
-		convexHull(contours, hull);
+		convexHull(fieldContours[maxCtsNumber], hull);
 
 		int hullCount = hull.size();
-		cv::Point point0 = hull[hullCount - 1];
+		cv::Point point0CC = hull[hullCount - 1];
 		for (int i = 0; i < hullCount; i++)
 		{
-			cv::Point point = hull[i];
-			cv::line(fieldCHImage, point0, point, cv::Scalar(255));
-			point0 = point;
+			cv::Point pointCC = hull[i];
+			cv::line(fieldCHImage, point0CC, pointCC, cv::Scalar(255));
+			point0CC = pointCC;
 		}
 	}
 
@@ -397,12 +437,12 @@ void act::Camera::getImage()
 				break;
 		}
 
-	//insert function of deleting oversize and undersize connected components here
+	////insert function of deleting oversize and undersize connected components here
 
 
-	//image processing of allBallImage
-	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
-	cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
+	////image processing of allBallImage
+	//cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
+	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
 
 	//element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
 	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_OPEN, element);

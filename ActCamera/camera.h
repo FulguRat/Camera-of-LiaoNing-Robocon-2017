@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
-#define __rows_took_out 47
+#define __rows_took_out 0
 
 namespace act
 {
@@ -53,6 +53,7 @@ namespace act
         cv::Mat getOriginalImageROI() const { return originalImage(ROIRect); }
         cv::Mat getBasicImage() const { return basicImage; }
 		cv::Mat getAllBallImage() const { return allBallImage; }
+		cv::Mat getAllGreenImage() const { return allGreenImage; }
 		cv::Mat getNoBGImage() const { return noBackgroundImage; }
 		cv::Mat getFieldCHImage() const { return fieldCHImage; }
         cv::Mat getNoBGBallImage() const { return noBGBallImage; }    
@@ -63,9 +64,10 @@ namespace act
 			cv::imshow("ORGROI", originalImage(ROIRect));
 			cv::imshow("BSC", basicImage);
 			cv::imshow("AB", allBallImage);
-			cv::imshow("noBG", noBackgroundImage);
+			cv::imshow("AG", allGreenImage);
+			cv::imshow("FC", fieldCtsImage);
 			cv::imshow("FCH", fieldCHImage);
-			cv::imshow("noBGB", noBGBallImage);
+			cv::imshow("NoBGB", noBGBallImage);
 		}
 
         void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
@@ -94,7 +96,9 @@ namespace act
 		cv::Mat originalImage;
         cv::Mat basicImage;
 		cv::Mat allBallImage;
+		cv::Mat allGreenImage;
         cv::Mat noBackgroundImage;
+		cv::Mat fieldCtsImage;
         cv::Mat fieldCHImage;
         cv::Mat noBGBallImage;
 		
@@ -105,6 +109,8 @@ namespace act
 
         cv::Mat ROIImage;
         cv::Rect ROIRect;
+
+		std::vector<std::vector<cv::Point>> fieldContours;
 
 		std::vector<int> CCSize;
 		std::vector<cv::Point> CCCore;
