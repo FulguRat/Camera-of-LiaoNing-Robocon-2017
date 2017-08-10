@@ -24,3 +24,6 @@ Golf ball recognition in LiaoNing robot contest 2017
     * 在`getImage()`内进行操作
 13. 橙色 蓝色 红色背景加入球的识别范围
 
+
+* 霍夫变换不能解决环境光照改变的本质问题
+

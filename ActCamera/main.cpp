@@ -16,7 +16,7 @@ const int32_t EXPOSURE_TIME = 300;  //time of exposure
 const int32_t CAMERA_NUMBER = 1; //camera number
 
 ////trackbar globe variable and callback function
-//const int g_trackbarMax = 200;
+//const int g_trackbarMax = 400;
 //int g_trackbarSlider;
 //int g_testValue = 0;
 //void trackbarCallback(int, void*)
@@ -47,8 +47,10 @@ int main(int argc, char *argv[])
 	//initialization cam0
     cam0.setExposureValue(false, EXPOSURE_TIME);
 	//cam0.setExposureValue(true);
-    cam0.setROIRect(cv::Rect(0, 140, cam0.cols, cam0.rows - 140));
+    cam0.setROIRect(cv::Rect(0, __rows_took_out, cam0.cols, cam0.rows - __rows_took_out));
 	//cam0.setBrightness(0);
+	//cam0.setExposureValue(false, 0);
+	cam0.setAutoWhiteBalance(true);
 	//cam0.autoSet();
 
 	//g_trackbarSlider = 0;
@@ -64,7 +66,8 @@ int main(int argc, char *argv[])
 
 		////test part
 		//cam0.setBrightness(g_testValue);
-		//cam0.setExposureValue(true);
+		//cam0.setExposureValue(false, g_testValue);
+		//cam0.setExposureValue(false, EXPOSURE_TIME);
 
 		//update frame
         cam0.update();
@@ -85,7 +88,7 @@ int main(int argc, char *argv[])
 		//}
 		//std::cout << std::endl;
 
-		cam0.areaSort(cam0.getNoBGBallImage());
+		//cam0.areaSort(cam0.getNoBGBallImage());
 
 		//show all images that have been used
 		cam0.showImage();

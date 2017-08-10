@@ -99,17 +99,71 @@ void act::Camera::autoSet()
 	//set brightness
 	do
 	{
-		//adjust brightness
-		if (minBGR < 100 && initCounter == 0) { brightness += 10; }
-		else if (minBGR >= 100 && minBGR < 130 && initCounter == 0) { brightness++; }
+	//	//adjust brightness
+	//	if (minBGR < 100 && initCounter == 0) { brightness += 10; }
+	//	else if (minBGR >= 100 && minBGR < 130 && initCounter == 0) { brightness++; }
 
-		else if (minBGR > 170 && initCounter == 0) { brightness -= 10; }
-		else if (minBGR <= 170 && minBGR > 140 && initCounter == 0) { brightness--; }
+	//	else if (minBGR > 170 && initCounter == 0) { brightness -= 10; }
+	//	else if (minBGR <= 170 && minBGR > 140 && initCounter == 0) { brightness--; }
+
+	//	else if (initCounter > 0) { initCounter--; }
+	//	else { break; }
+
+	//	setBrightness(brightness);
+
+	//	averageBGR[0] = 0;
+	//	averageBGR[1] = 0;
+	//	averageBGR[2] = 0;
+	//	refPointCounter = 0;
+
+	//	//update original image
+	//	update();
+	//	imshow("ORIGINAL", getOriginalImageROI());
+	//	//get RGB value of white area
+	//	for (int i = 80; i < originalImage(ROIRect).rows; i++)
+	//	{
+	//		for (int j = 300; j < originalImage(ROIRect).cols; j++)
+	//		{
+	//			auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
+
+	//			averageBGR[0] += pix[0];
+	//			averageBGR[1] += pix[1];
+	//			averageBGR[2] += pix[2];
+
+	//			refPointCounter++;
+	//		}
+	//	}
+	//	averageBGR[0] /= refPointCounter;
+	//	averageBGR[1] /= refPointCounter;
+	//	averageBGR[2] /= refPointCounter;
+
+	//	//find the minimal value of BGR
+	//	minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
+	//	minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
+	//	
+	//	std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
+			<< brightness << "   " << minBGR << std::endl;
+
+	//	//if push down Esc, kill the progress
+	//	if (cv::waitKey(10) == 27)
+	//	{
+	//		break;
+	//	}
+	//} while ((minBGR < 130 || minBGR > 140) || initCounter > 0);
+
+	//std::cout << "Auto set brightness done" << std::endl;
+
+	//adjust exposure time
+		if (minBGR < 100 && initCounter == 0) { expoTime += 10; }
+		else if (minBGR >= 100 && minBGR < 130 && initCounter == 0) { expoTime++; }
+
+		else if (minBGR > 170 && initCounter == 0) { expoTime -= 10; }
+		else if (minBGR <= 170 && minBGR > 140 && initCounter == 0) { expoTime--; }
 
 		else if (initCounter > 0) { initCounter--; }
 		else { break; }
 
-		setBrightness(brightness);
+		setExposureValue(false, expoTime);
 
 		averageBGR[0] = 0;
 		averageBGR[1] = 0;
@@ -120,7 +174,7 @@ void act::Camera::autoSet()
 		update();
 		imshow("ORIGINAL", getOriginalImageROI());
 		//get RGB value of white area
-		for (int i = 170; i < originalImage(ROIRect).rows; i++)
+		for (int i = 80; i < originalImage(ROIRect).rows; i++)
 		{
 			for (int j = 300; j < originalImage(ROIRect).cols; j++)
 			{
@@ -140,9 +194,9 @@ void act::Camera::autoSet()
 		//find the minimal value of BGR
 		minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
 		minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
-		
+
 		std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
-			<< brightness << "   " << minBGR << std::endl;
+			<< expoTime << "   " << minBGR << std::endl;
 
 		//if push down Esc, kill the progress
 		if (cv::waitKey(10) == 27)
@@ -151,7 +205,7 @@ void act::Camera::autoSet()
 		}
 	} while ((minBGR < 130 || minBGR > 140) || initCounter > 0);
 
-	std::cout << "Auto set brightness done" << std::endl;
+	std::cout << "Auto set exposure time done" << std::endl;
 
 	//set white balance
 	gainBGR[0] = (float)minBGR / (float)averageBGR[0];
@@ -359,6 +413,7 @@ void act::Camera::getImage()
 
 void act::Camera::areaSort(cv::Mat ballImage)
 {
+	//modify with macro __rows_took_out
 	cv::line(ballImage, cv::Point(128, 0), cv::Point(0  , 90), cv::Scalar(255));
 	cv::line(ballImage, cv::Point(193, 0), cv::Point(320, 98), cv::Scalar(255));
 
@@ -369,6 +424,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	{
 		float stdPixNum = 10.13f * (float)CCCore.back().y - 128.30f;
 
+		//modify with macro __rows_took_out
 		double borderXLeft = 128.44f - 1.43f * (float)CCCore.back().y;
 		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
 

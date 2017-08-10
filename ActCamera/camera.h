@@ -4,6 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
+#define __rows_took_out 47
+
 namespace act
 {
 	class Camera : public VCConfig
@@ -47,6 +49,7 @@ namespace act
             ROIRows = r.height;
         }
 
+		cv::Mat getoriginalImage() const { return originalImage; }
         cv::Mat getOriginalImageROI() const { return originalImage(ROIRect); }
         cv::Mat getBasicImage() const { return basicImage; }
 		cv::Mat getAllBallImage() const { return allBallImage; }
@@ -56,7 +59,8 @@ namespace act
 
 		void showImage() const
 		{
-			cv::imshow("ORG", originalImage(ROIRect));
+			cv::imshow("ORG", originalImage);
+			cv::imshow("ORGROI", originalImage(ROIRect));
 			cv::imshow("BSC", basicImage);
 			cv::imshow("AB", allBallImage);
 			cv::imshow("noBG", noBackgroundImage);
@@ -106,7 +110,8 @@ namespace act
 		std::vector<cv::Point> CCCore;
 
 		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
-		int brightness = 0;
+		//int brightness = 0;
+		int expoTime = 0;
 
         int usbNumber = 0;
     };
