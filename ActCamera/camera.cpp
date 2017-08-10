@@ -18,7 +18,7 @@ act::Camera::Camera(char _id) : VCConfig(_id)
 	}
 }
 
-void act::Camera::findConnectedComponents(const cv::Mat &binary)
+void act::Camera::findConnectedComponents(cv::Mat &binary)
 {
 	auto bin = binary.clone();
 
@@ -82,21 +82,30 @@ void act::Camera::findConnectedComponents(const cv::Mat &binary)
 				coreX = 0;
 				coreY = 0;
 
-				CCSize.push_back(counter);
+				//if pix number size up, push pix num into CCSize, else pop x and y out from CCCore and change noBGBallImage
+				if (counter < 0.6f * STD_PIXS || counter > 3.0f * STD_PIXS)
+				{
+					//here should get rid of extra CC from noBGBallImage, fix me
+
+					CCCore.pop_back();
+				}
+				else
+					CCSize.push_back(counter);
+
 				counter = 0;
 			}
 		}
 	}
-	//test reference pix num of specific y
-	while (!CCSize.empty() && !CCCore.empty())
-	{
-		std::cout << CCSize.back() << "  ";
-		std::cout << CCCore.back() << "  ";
+	////test reference pix num of specific y
+	//while (!CCSize.empty() && !CCCore.empty())
+	//{
+	//	std::cout << CCSize.back() << "  ";
+	//	std::cout << CCCore.back() << "  ";
 
-		CCSize.pop_back();
-		CCCore.pop_back();
-	}
-	std::cout << std::endl;
+	//	CCSize.pop_back();
+	//	CCCore.pop_back();
+	//}
+	//std::cout << std::endl;
 }
 
 void act::Camera::autoSet()
@@ -261,7 +270,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if (pix[2] > 180 || pix[2] < 70)
+			if (pix[2] > 180 || pix[2] < 40)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -277,7 +286,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field, should add orange/red/blue, fix me
-			if ((pix[0] > 95 && pix[0] < 130)/*(pix[0] > 105 && pix[0] < 140)*/)
+			if ((pix[0] > 60 && pix[0] < 130)/*(pix[0] > 105 && pix[0] < 140)*/)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
@@ -445,9 +454,9 @@ void act::Camera::getImage()
 			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
 				break;
 		}
-
-	////insert function of deleting oversize and undersize connected components here
-
+	
+	//find connected components and get rid of oversize and undersize parts in noBGBallImage
+	findConnectedComponents(noBGBallImage);
 
 	////image processing of allBallImage
 	//cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
@@ -462,7 +471,7 @@ void act::Camera::getImage()
 
 void act::Camera::areaSort(cv::Mat ballImage)
 {
-	//modify with macro __rows_took_out
+	//modify with macro ROWS_CUTS
 	cv::line(ballImage, cv::Point(128, 0), cv::Point(0  , 90), cv::Scalar(255));
 	cv::line(ballImage, cv::Point(193, 0), cv::Point(320, 98), cv::Scalar(255));
 
@@ -471,18 +480,19 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 	while (!CCSize.empty() && !CCCore.empty())
 	{
-		float stdPixNum = 10.13f * (float)CCCore.back().y - 128.30f;
+		//float stdPixNum = 0.039f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) -
+		//	              2.586f * ((float)CCCore.back().y + ROWS_CUTS) - 55.34f;
 
-		//modify with macro __rows_took_out
+		//modify with macro ROWS_CUTS
 		double borderXLeft = 128.44f - 1.43f * (float)CCCore.back().y;
 		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
 
 		//judge the number of golf ball in this connected component
-		if ((float)CCSize.back() >= 0.6f * stdPixNum && (float)CCSize.back() <= 1.5f * stdPixNum)
+		if ((float)CCSize.back() >= 0.6f * STD_PIXS && (float)CCSize.back() <= 1.5f * STD_PIXS)
 			incNum = 1;
-		else if ((float)CCSize.back() > 1.5f * stdPixNum && (float)CCSize.back() <= 2.25f * stdPixNum)
+		else if ((float)CCSize.back() > 1.5f * STD_PIXS && (float)CCSize.back() <= 2.25f * STD_PIXS)
 			incNum = 2;
-		else if ((float)CCSize.back() > 2.25f * stdPixNum)
+		else if ((float)CCSize.back() > 2.25f * STD_PIXS)
 			incNum = 3;
 		else
 			incNum = 0;

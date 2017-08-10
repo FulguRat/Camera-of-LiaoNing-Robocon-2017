@@ -4,7 +4,10 @@
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
-#define __rows_took_out 0
+#define ROWS_CUTS 100
+
+#define STD_PIXS (0.039f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
+                  2.586f * ((float)CCCore.back().y + ROWS_CUTS) - 55.34f)
 
 namespace act
 {
@@ -72,7 +75,7 @@ namespace act
 
         void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
 
-        void findConnectedComponents(const cv::Mat &binary);
+        void findConnectedComponents(cv::Mat &binary);
 
 		void areaSort(cv::Mat ballImage);
 

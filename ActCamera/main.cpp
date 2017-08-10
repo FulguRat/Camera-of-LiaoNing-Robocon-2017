@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
     }
 
 	//initialization cam0
-    //cam0.setExposureValue(false, EXPOSURE_TIME);
-	cam0.setExposureValue(true);
-    cam0.setROIRect(cv::Rect(0, __rows_took_out, cam0.cols, cam0.rows - __rows_took_out));
+    cam0.setExposureValue(false, EXPOSURE_TIME);
+	//cam0.setExposureValue(true);
+    cam0.setROIRect(cv::Rect(0, ROWS_CUTS, cam0.cols, cam0.rows - ROWS_CUTS));
 	//cam0.setBrightness(0);
 	//cam0.setExposureValue(false, 0);
 	cam0.setAutoWhiteBalance(true);
@@ -75,9 +75,7 @@ int main(int argc, char *argv[])
 		//get usdful image
 		cam0.getImage();
 
-		cam0.findConnectedComponents(cam0.getNoBGBallImage());	
-
-		//cam0.areaSort(cam0.getNoBGBallImage());
+		cam0.areaSort(cam0.getNoBGBallImage());
 
 		//show all images that have been used
 		cam0.showImage();
