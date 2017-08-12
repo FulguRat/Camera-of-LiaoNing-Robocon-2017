@@ -1,7 +1,6 @@
 #ifndef __CAMERA_H
 #define __CAMERA_H
 
-#include <string>
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
@@ -22,8 +21,6 @@ namespace act
 
         bool is_open() { return fd != -1; }
 
-		void autoSet();
-
         void update()
         {
             cv::Mat temp;
@@ -34,13 +31,6 @@ namespace act
                 for (auto j = 0; j < temp.cols; ++j)
                 {
 					originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
-
-					//auto pix = originalImage.ptr<cv::Vec3b>(i)[j];
-
-					////set BGR gain of original image
-					//originalImage.ptr<cv::Vec3b>(i)[j][0] = (uchar)((float)pix[0] * gainBGR[0]);
-					//originalImage.ptr<cv::Vec3b>(i)[j][1] = (uchar)((float)pix[1] * gainBGR[1]);
-					//originalImage.ptr<cv::Vec3b>(i)[j][2] = (uchar)((float)pix[2] * gainBGR[2]);
                 }
             }
         }
@@ -61,7 +51,7 @@ namespace act
 		cv::Mat getAllGreenImage() const { return allGreenImage; }
 		cv::Mat getNoBGImage() const { return noBackgroundImage; }
 		cv::Mat getFieldCHImage() const { return fieldCHImage; }
-        cv::Mat getNoBGBallImage() const { return noBGBallImage; }    
+        cv::Mat getNoBGBallImage() const { return noBGBallImage; }
 
 		//void showTrackbar();
 
@@ -124,11 +114,6 @@ namespace act
 		cv::Mat fieldCtsImage;
         cv::Mat fieldCHImage;
         cv::Mat noBGBallImage;
-		
-		std::vector<cv::Mat> BGRChannels;
-		cv::Mat blueImage;
-		cv::Mat greenImage;
-		cv::Mat redImage;
 
         cv::Mat ROIImage;
         cv::Rect ROIRect;
@@ -137,10 +122,6 @@ namespace act
 
 		std::vector<int> CCSize;
 		std::vector<cv::Point> CCCore;
-
-		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
-		//int exposure time = 0;
-		int expoTime = 0;
 
         int usbNumber = 0;
     };

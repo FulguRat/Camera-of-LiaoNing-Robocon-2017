@@ -15,14 +15,14 @@ const int32_t EXPOSURE_TIME = 300;  //time of exposure
 
 const int32_t CAMERA_NUMBER = 1; //camera number
 
-////////////trackbar globe variable and callback function
-//////////const int g_trackbarMax = 400;
-//////////int g_trackbarSlider;
-//////////int g_testValue = 0;
-//////////void trackbarCallback(int, void*)
-//////////{
-//////////	g_testValue = g_trackbarSlider;
-//////////}
+////trackbar globe variable and callback function
+//const int g_trackbarMax = 400;
+//int g_trackbarSlider;
+//int g_testValue = 0;
+//void trackbarCallback(int, void*)
+//{
+//	g_testValue = g_trackbarSlider;
+//}
 
 int main(int argc, char *argv[])
 {
@@ -45,29 +45,23 @@ int main(int argc, char *argv[])
     }
 
 	//initialization cam0
-    //cam0.setExposureValue(false, 300);
 	cam0.setExposureValue(true);
-    cam0.setROIRect(cv::Rect(0, ROWS_CUTS, cam0.cols, cam0.rows - ROWS_CUTS));
-	//cam0.setBrightness(0);
-	//cam0.setExposureValue(false, 0);
 	cam0.setAutoWhiteBalance(true);
-	//cam0.autoSet();
+    cam0.setROIRect(cv::Rect(0, ROWS_CUTS, cam0.cols, cam0.rows - ROWS_CUTS));
 
-	//////////g_trackbarSlider = 0;
-	//////////cv::namedWindow("TKB");
-	//////////cv::createTrackbar("trackBar", "ORG", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
-	//////////trackbarCallback(g_trackbarSlider, 0);
+	//g_trackbarSlider = 0;
+	//cv::namedWindow("TKB");
+	//cv::createTrackbar("trackBar", "ORG", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
+	//trackbarCallback(g_trackbarSlider, 0);
 
     act::Timestamp timer;
     while (1)
     {
-        //__TIMER_PRINT__;
-        //__TIMER_START__;
+        __TIMER_PRINT__;
+        __TIMER_START__;
 
-		//test part
-		//cam0.setBrightness(g_testValue);
+		////test part
 		//cam0.setExposureValue(false, g_testValue);
-		//cam0.setExposureValue(false, EXPOSURE_TIME);
 
 		//update frame
         cam0.update();
@@ -75,6 +69,7 @@ int main(int argc, char *argv[])
 		//get usdful image
 		cam0.getImage();
 
+		//sort to three area
 		cam0.areaSort(cam0.getNoBGBallImage());
 
 		//show all images that have been used
@@ -86,7 +81,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-
     return 0;
 }
 

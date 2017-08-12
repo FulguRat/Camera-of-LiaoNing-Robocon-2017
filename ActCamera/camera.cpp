@@ -130,150 +130,10 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 	//std::cout << std::endl;
 }
 
-void act::Camera::autoSet()
-{
-	int averageBGR[3] = { 0 };
-	int refPointCounter = 0;
-	int minBGR = 0;
-	int initCounter = 3;
-
-	//set brightness
-	do
-	{
-	//	//adjust brightness
-	//	if (minBGR < 100 && initCounter == 0) { brightness += 10; }
-	//	else if (minBGR >= 100 && minBGR < 130 && initCounter == 0) { brightness++; }
-
-	//	else if (minBGR > 170 && initCounter == 0) { brightness -= 10; }
-	//	else if (minBGR <= 170 && minBGR > 140 && initCounter == 0) { brightness--; }
-
-	//	else if (initCounter > 0) { initCounter--; }
-	//	else { break; }
-
-	//	setBrightness(brightness);
-
-	//	averageBGR[0] = 0;
-	//	averageBGR[1] = 0;
-	//	averageBGR[2] = 0;
-	//	refPointCounter = 0;
-
-	//	//update original image
-	//	update();
-	//	imshow("ORIGINAL", getOriginalImageROI());
-	//	//get RGB value of white area
-	//	for (int i = 80; i < originalImage(ROIRect).rows; i++)
-	//	{
-	//		for (int j = 300; j < originalImage(ROIRect).cols; j++)
-	//		{
-	//			auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
-
-	//			averageBGR[0] += pix[0];
-	//			averageBGR[1] += pix[1];
-	//			averageBGR[2] += pix[2];
-
-	//			refPointCounter++;
-	//		}
-	//	}
-	//	averageBGR[0] /= refPointCounter;
-	//	averageBGR[1] /= refPointCounter;
-	//	averageBGR[2] /= refPointCounter;
-
-	//	//find the minimal value of BGR
-	//	minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
-	//	minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
-	//	
-	//	std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
-			<< brightness << "   " << minBGR << std::endl;
-
-	//	//if push down Esc, kill the progress
-	//	if (cv::waitKey(10) == 27)
-	//	{
-	//		break;
-	//	}
-	//} while ((minBGR < 130 || minBGR > 140) || initCounter > 0);
-
-	//std::cout << "Auto set brightness done" << std::endl;
-
-	//adjust exposure time
-		if (minBGR < 100 && initCounter == 0) { expoTime += 10; }
-		else if (minBGR >= 100 && minBGR < 130 && initCounter == 0) { expoTime++; }
-
-		else if (minBGR > 170 && initCounter == 0) { expoTime -= 10; }
-		else if (minBGR <= 170 && minBGR > 140 && initCounter == 0) { expoTime--; }
-
-		else if (initCounter > 0) { initCounter--; }
-		else { break; }
-
-		setExposureValue(false, expoTime);
-
-		averageBGR[0] = 0;
-		averageBGR[1] = 0;
-		averageBGR[2] = 0;
-		refPointCounter = 0;
-
-		//update original image
-		update();
-		imshow("ORIGINAL", getOriginalImageROI());
-		//get RGB value of white area
-		for (int i = 80; i < originalImage(ROIRect).rows; i++)
-		{
-			for (int j = 300; j < originalImage(ROIRect).cols; j++)
-			{
-				auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
-
-				averageBGR[0] += pix[0];
-				averageBGR[1] += pix[1];
-				averageBGR[2] += pix[2];
-
-				refPointCounter++;
-			}
-		}
-		averageBGR[0] /= refPointCounter;
-		averageBGR[1] /= refPointCounter;
-		averageBGR[2] /= refPointCounter;
-
-		//find the minimal value of BGR
-		minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
-		minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
-
-		std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
-			<< expoTime << "   " << minBGR << std::endl;
-
-		//if push down Esc, kill the progress
-		if (cv::waitKey(10) == 27)
-		{
-			break;
-		}
-	} while ((minBGR < 130 || minBGR > 140) || initCounter > 0);
-
-	std::cout << "Auto set exposure time done" << std::endl;
-
-	//set white balance
-	gainBGR[0] = (float)minBGR / (float)averageBGR[0];
-	gainBGR[1] = (float)minBGR / (float)averageBGR[1];
-	gainBGR[2] = (float)minBGR / (float)averageBGR[2];
-
-	std::cout << gainBGR[0] << "   " << gainBGR[1] << "   " << gainBGR[2] << std::endl;
-	std::cout << "Auto set white balance done" << std::endl;
-}
-
 void act::Camera::getImage()
 {
 	auto col_val = new min_max[originalImage(ROIRect).rows];
 	auto row_val = new min_max[originalImage(ROIRect).cols];
-
-	////equalize hist
-	//cv::split(originalImage, BGRChannels);
-
-	//blueImage = BGRChannels.at(0);
-	//greenImage = BGRChannels.at(1);
-	//redImage = BGRChannels.at(2);
-
-	//cv::equalizeHist(blueImage , blueImage );
-	//cv::equalizeHist(greenImage, greenImage);
-	//cv::equalizeHist(redImage  , redImage  );
-
-	//cv::merge(BGRChannels, originalImage);
 
 	//get basic image for later handle
 	basicImage = originalImage(ROIRect).clone();
@@ -292,7 +152,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if (pix[2] > 180 || pix[2] < 100)
+			if ((pix[1] < 70 && pix[2] > 185) || pix[2] < 90)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -307,8 +167,8 @@ void act::Camera::getImage()
 		{
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
-			//green field, should add orange/red/blue, fix me
-			if ((pix[0] > 60 && pix[0] < 130)/*(pix[0] > 105 && pix[0] < 140)*/)
+			//green field and orange border, red/blue(storeroom), fix me
+			if ((pix[0] > 60 && pix[0] < 130) || (pix[0] < 30 && pix[1] > 100 && pix[1] < 200 && pix[2] > 100))
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
@@ -338,96 +198,6 @@ void act::Camera::getImage()
 		cv::line(fieldCtsImage, point0Cts, pointCts, cv::Scalar(255));
 		point0Cts = pointCts;
 	}
-
-	//for (auto i = 0; i < noBackgroundImage.rows; ++i)
-	//{
-	//	for (auto j = 0; j < noBackgroundImage.cols; ++j)
-	//	{
-	//		auto pix = noBackgroundImage.ptr<cv::Vec3b>(i)[j];
-
-	//		//green / orange / blue / redfield
-	//		if ((pix[0] > 100 && pix[0] < 140 && pix[1] > 100 &&/* pix[1] < 180 && */pix[2] > 25 && pix[2] < 160) ||
-	//			(pix[0] < 30  && pix[1] > 230 && pix[2] > 60 && pix[2] < 130))
-	//		{
-	//			if (!col_val[i].min)
-	//				col_val[i].min = j;
-	//			col_val[i].max = j;
-
-	//			if (!row_val[j].min)
-	//				row_val[j].min = i;
-	//			row_val[j].max = i;
-	//		}
-	//	}
-	//}
-	////fill the vacancy in green field nearby the border
-	//for (auto i = 0; i < noBackgroundImage.rows; ++i)
-	//{
-	//	for (auto j = 0; j < noBackgroundImage.cols; ++j)
-	//	{
-	//		if ((i < row_val[j].max && i > row_val[j].min) && (col_val[i].max - col_val[i].min > 100))
-	//		{
-	//			if (col_val[i].min > j)
-	//				col_val[i].min = j;
-	//			if (col_val[i].max < j)
-	//				col_val[i].max = j;
-	//		}
-
-	//		if ((j > col_val[i].min && j < col_val[i].max) && (row_val[j].max - row_val[j].min > 100))
-	//		{
-	//			if (row_val[j].max < i)
-	//				row_val[j].max = i;
-	//			if (row_val[j].min > i)
-	//				row_val[j].min = i;
-	//		}
-	//	}
-	//}
-
-	////transform the field white and the others black, convert the image to gray image
-	//for (auto i = 0; i < noBackgroundImage.rows; i++)
-	//{
-	//	for (auto j = 0; j < noBackgroundImage.cols; j++)
-	//	{
-	//		if ((i < row_val[j].max && i > row_val[j].min) || (j > col_val[i].min && j < col_val[i].max))
-	//			*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {255, 255, 255};
-	//		else
-	//			*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
-
-	//		if (i == 0 || i == noBackgroundImage.rows - 1 || j == 0 || j == noBackgroundImage.cols - 1)
-	//			*noBackgroundImage.ptr<cv::Vec3b>(i, j) = {0, 0, 0};
-	//	}
-	//}
-	//cv::cvtColor(noBackgroundImage, noBackgroundImage, CV_RGB2GRAY);
-
-	////find contours
-	//std::vector<cv::Point> contours;
-	//for (auto i = 0; i < noBackgroundImage.rows; i++)
-	//	for (auto j = 0; j < noBackgroundImage.cols; j++)
-	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-	//		{
-	//			contours.push_back({j, i});
-	//			break;
-	//		}
-	//for (auto i = 0; i < noBackgroundImage.rows; i++)
-	//	for (auto j = noBackgroundImage.cols - 1; j >= 0; j--)
-	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-	//		{
-	//			contours.push_back({j, i});
-	//			break;
-	//		}
-	//for (auto j = 0; j < noBackgroundImage.cols; j++)
-	//	for (auto i = 0; i < noBackgroundImage.rows; i++)
-	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-	//		{
-	//			contours.push_back({j, i});
-	//			break;
-	//		}
-	//for (auto j = 0; j < noBackgroundImage.cols; j++)
-	//	for (auto i = noBackgroundImage.rows - 1; i >= 0; i--)
-	//		if (*noBackgroundImage.ptr<uchar>(i, j) == 255)
-	//		{
-	//			contours.push_back({j, i});
-	//			break;
-	//		}
 
 	//get convex hull of the field
 	fieldCHImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
@@ -484,9 +254,6 @@ void act::Camera::getImage()
 	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
 	cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
 
-	//element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
-	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_OPEN, element);
-
 	delete[] col_val;
 	delete[] row_val;
 }
@@ -502,9 +269,6 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 	while (!CCSize.empty() && !CCCore.empty())
 	{
-		//float stdPixNum = 0.039f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) -
-		//	              2.586f * ((float)CCCore.back().y + ROWS_CUTS) - 55.34f;
-
 		//modify with macro ROWS_CUTS
 		double borderXLeft = 128.44f - 1.43f * (float)CCCore.back().y;
 		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
@@ -542,7 +306,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	else
 		targetArea = 2;
 
-	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   " << targetArea << std::endl;
+	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
 
 	areaLNum = 0;
 	areaMNum = 0;
