@@ -1,10 +1,11 @@
 #ifndef __CAMERA_H
 #define __CAMERA_H
 
+#include <string>
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
 
-#define ROWS_CUTS 100
+#define ROWS_CUTS 80
 
 #define STD_PIXS (0.039f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
                   2.586f * ((float)CCCore.back().y + ROWS_CUTS) - 55.34f)
@@ -33,6 +34,7 @@ namespace act
                 for (auto j = 0; j < temp.cols; ++j)
                 {
 					originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
+
 					//auto pix = originalImage.ptr<cv::Vec3b>(i)[j];
 
 					////set BGR gain of original image
@@ -60,6 +62,8 @@ namespace act
 		cv::Mat getNoBGImage() const { return noBackgroundImage; }
 		cv::Mat getFieldCHImage() const { return fieldCHImage; }
         cv::Mat getNoBGBallImage() const { return noBGBallImage; }    
+
+		//void showTrackbar();
 
 		void showImage() const
 		{
@@ -96,6 +100,22 @@ namespace act
     private:
         cv::VideoCapture videoCapture;
 		
+		////trackbar class and its vector
+		//struct trackbar
+		//{
+		//	trackbar() {}
+		//	trackbar(char* _name, int _maxValue) : name(_name), maxValue(_maxValue) {}
+		//	char* name;
+		//	int maxValue = 0;
+		//	int outputValue = 0;
+		//	int slider = 0;
+		//	void callback(int, void*)
+		//	{
+		//		outputValue = slider;
+		//	}
+		//};
+		//trackbar* trackbarSet;
+
 		cv::Mat originalImage;
         cv::Mat basicImage;
 		cv::Mat allBallImage;
@@ -119,7 +139,7 @@ namespace act
 		std::vector<cv::Point> CCCore;
 
 		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
-		//int brightness = 0;
+		//int exposure time = 0;
 		int expoTime = 0;
 
         int usbNumber = 0;

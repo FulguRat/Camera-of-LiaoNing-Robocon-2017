@@ -18,6 +18,28 @@ act::Camera::Camera(char _id) : VCConfig(_id)
 	}
 }
 
+//void act::Camera::showTrackbar()
+//{
+//	trackbarSet = new trackbar[6];
+//
+//	trackbarSet[0] = trackbar("minB", 255);
+//	trackbarSet[1] = trackbar("maxB", 255);
+//	trackbarSet[2] = trackbar("minG", 255);
+//	trackbarSet[3] = trackbar("maxG", 255);
+//	trackbarSet[4] = trackbar("minR", 255);
+//	trackbarSet[5] = trackbar("maxR", 255);
+//	
+//	cv::namedWindow("TKB");
+//	
+//	for (auto i = 0; i < 6; i++)
+//	{
+//		cv::createTrackbar(trackbarSet[i].name, "TKB", &trackbarSet[i].slider, trackbarSet[i].maxValue, trackbarSet[i].callback);
+//		trackbarSet[i].callback(trackbarSet[i].slider, 0);
+//	}
+//
+//	delete[] trackbarSet;
+//}
+
 void act::Camera::findConnectedComponents(cv::Mat &binary)
 {
 	auto bin = binary.clone();
@@ -270,7 +292,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if (pix[2] > 180 || pix[2] < 40)
+			if (pix[2] > 180 || pix[2] < 100)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -458,9 +480,9 @@ void act::Camera::getImage()
 	//find connected components and get rid of oversize and undersize parts in noBGBallImage
 	findConnectedComponents(noBGBallImage);
 
-	////image processing of allBallImage
-	//cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
-	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
+	//image processing of allBallImage
+	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
+	cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
 
 	//element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
 	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_OPEN, element);
