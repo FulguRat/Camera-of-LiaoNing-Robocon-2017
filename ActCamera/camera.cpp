@@ -306,6 +306,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	else
 		targetArea = 2;
 
+	serialPrintf(fd, "%d", targetArea);
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
 
 	areaLNum = 0;

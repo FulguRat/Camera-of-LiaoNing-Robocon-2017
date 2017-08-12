@@ -3,6 +3,9 @@
 
 #include <opencv2/opencv.hpp>
 #include "videoconfig.h"
+#include <wiringPi.h>
+#include <wiringSerial.h>
+#include <errno.h>
 
 #define ROWS_CUTS 80
 

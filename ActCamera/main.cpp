@@ -5,6 +5,7 @@
 #include "videoconfig.h"
 #include "camera.h"
 
+
 //calculate time of every circulation
 #define __TIMER_START__ timer.start()
 #define __TIMER_PRINT__ do { timer.end(); std::cout << (int)(timer.getTime() * 1000) << std::endl; } while (0)
@@ -43,11 +44,27 @@ int main(int argc, char *argv[])
         std::cout << "Open Camera failed!" << std::endl;
         exit(-2);
     }
+	else
+	{
+		std::cout << "Camera init Done" << std::endl;
+	}
 
 	//initialization cam0
 	cam0.setExposureValue(true);
 	cam0.setAutoWhiteBalance(true);
     cam0.setROIRect(cv::Rect(0, ROWS_CUTS, cam0.cols, cam0.rows - ROWS_CUTS));
+
+	//initialization wiringPi and serial
+	wiringPiSetup();
+	int fd;
+	if ((fd = serialOpen("/dev/ttyAMA0", 115200)) < 0)
+	{
+		fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
+	}
+	else
+	{
+		printf("Serial init done and fd = %d\n", fd);
+	}
 
 	//g_trackbarSlider = 0;
 	//cv::namedWindow("TKB");
