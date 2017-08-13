@@ -68,6 +68,7 @@ namespace act
 			cv::imshow("FC", fieldCtsImage);
 			cv::imshow("FCH", fieldCHImage);
 			cv::imshow("NoBGB", noBGBallImage);
+			cv::imshow("BP", ballPositionImage);
 		}
 
         void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
@@ -117,6 +118,7 @@ namespace act
 		cv::Mat fieldCtsImage;
         cv::Mat fieldCHImage;
         cv::Mat noBGBallImage;
+		cv::Mat ballPositionImage;
 
         cv::Mat ROIImage;
         cv::Rect ROIRect;

@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 #include <unistd.h>
@@ -95,7 +96,16 @@ int main(int argc, char *argv[])
 		//if push down Esc, kill the progress
         if (cv::waitKey(10) == 27)
         {
-            break;
+			//if (system("shutdown -h now") == 1)
+			//{
+			//	std::cout << "ready for shutdown" << std::endl;
+			//}
+			//else
+			//{
+			//	std::cout << "shutdown failed!" << std::endl;
+			//}
+
+			break;
         }
     }
     return 0;

@@ -45,6 +45,7 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 	auto bin = binary.clone();
 
 	std::vector<cv::Point> stk_white;
+	bool farFlag = 0;
 	unsigned int counter = 0;
 	unsigned long long coreX = 0;
 	unsigned long long coreY = 0;
@@ -64,6 +65,11 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 			while (!stk_white.empty())
 			{
 				auto pix = stk_white.back();
+				
+				//if this connected component is too away from comera, get rid of it
+				if (pix.y <= 5)
+					farFlag = 1;
+
 				stk_white.pop_back();
 				counter++;
 				coreX += pix.x;
@@ -101,21 +107,21 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 				coreX /= counter;
 				coreY /= counter;
 				CCCore.push_back(cv::Point((int)coreX, (int)coreY));
-				coreX = 0;
-				coreY = 0;
 
-				//if pix number size up, push pix num into CCSize, else pop x and y out from CCCore and change noBGBallImage
-				if (counter < 0.6f * STD_PIXS || counter > 3.0f * STD_PIXS)
+				//if pix number size up or CC is too far, push pix num into CCSize, else pop x and y out from CCCore
+				if ((counter < 0.6f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1)
 				{
-					//here should get rid of extra CC from noBGBallImage, fix me
-
-					CCCore.pop_back();
+					CCCore.pop_back();				
 				}
 				else
-					CCSize.push_back(counter);
-
-				counter = 0;
+					CCSize.push_back(counter);	
 			}
+			coreX = 0;
+			coreY = 0;
+
+			farFlag = 0;
+
+			counter = 0;
 		}
 	}
 	////test reference pix num of specific y
@@ -267,6 +273,8 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	int areaLNum = 0, areaMNum = 0, areaRNum = 0, incNum = 0;
 	int targetArea = 0;
 
+	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+
 	while (!CCSize.empty() && !CCCore.empty())
 	{
 		//modify with macro ROWS_CUTS
@@ -291,6 +299,8 @@ void act::Camera::areaSort(cv::Mat ballImage)
 			areaMNum += incNum;
 
 		incNum = 0;
+
+		cv::circle(ballPositionImage, CCCore.back(), 5, 255, 1);
 
 		CCSize.pop_back();
 		CCCore.pop_back();
