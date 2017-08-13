@@ -15,5 +15,3 @@ Golf ball recognition in LiaoNing robot contest 2017
    * 开机自启未实现
    * 关机实现：配置GPIO为输入模式，读取电平值关机
 8. 尝试HSV+BGR的颜色判定方式
-9. 通过连通域y的最小值锁识别区间
-

@@ -120,7 +120,6 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 			coreY = 0;
 
 			farFlag = 0;
-
 			counter = 0;
 		}
 	}
