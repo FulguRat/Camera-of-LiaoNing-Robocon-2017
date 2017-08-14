@@ -109,7 +109,7 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 				CCCore.push_back(cv::Point((int)coreX, (int)coreY));
 
 				//if pix number size up or CC is too far, push pix num into CCSize, else pop x and y out from CCCore
-				if ((counter < 0.6f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1)
+				if ((counter < 0.5f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1)
 				{
 					CCCore.pop_back();				
 				}
@@ -157,7 +157,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[1] < 70 && pix[2] > 185) || pix[2] < 90)
+			if ((pix[1] < 70 && pix[2] > 185) || pix[2] < 110)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -173,7 +173,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field and orange border, red/blue(storeroom), fix me
-			if ((pix[0] > 60 && pix[0] < 130) || (pix[0] < 30 && pix[1] > 100 && pix[1] < 200 && pix[2] > 100))
+			if ((pix[0] > 60 && pix[0] < 140) || (pix[0] < 30 && pix[1] > 100 && pix[1] < 200 && pix[2] > 100))
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
@@ -270,7 +270,6 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	cv::line(ballImage, cv::Point(193, 0), cv::Point(320, 98), cv::Scalar(255));
 
 	int areaLNum = 0, areaMNum = 0, areaRNum = 0, incNum = 0;
-	int targetArea = 0;
 
 	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
 
@@ -281,7 +280,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
 
 		//judge the number of golf ball in this connected component
-		if ((float)CCSize.back() >= 0.6f * STD_PIXS && (float)CCSize.back() <= 1.5f * STD_PIXS)
+		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.5f * STD_PIXS)
 			incNum = 1;
 		else if ((float)CCSize.back() > 1.5f * STD_PIXS && (float)CCSize.back() <= 2.25f * STD_PIXS)
 			incNum = 2;
@@ -315,7 +314,6 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	else
 		targetArea = 2;
 
-	serialPrintf(fd, "%d", targetArea);
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
 
 	areaLNum = 0;

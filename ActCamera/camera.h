@@ -9,8 +9,8 @@
 
 #define ROWS_CUTS 80
 
-#define STD_PIXS (0.039f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
-                  2.586f * ((float)CCCore.back().y + ROWS_CUTS) - 55.34f)
+#define STD_PIXS (0.067f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
+                  8.28f * ((float)CCCore.back().y + ROWS_CUTS) + 273.22f)
 
 namespace act
 {
@@ -90,6 +90,8 @@ namespace act
 
         int ROICols = 0;
         int ROIRows = 0;
+
+		int targetArea = 0;
 
     private:
         cv::VideoCapture videoCapture;

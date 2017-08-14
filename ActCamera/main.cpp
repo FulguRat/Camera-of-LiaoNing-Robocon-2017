@@ -67,6 +67,9 @@ int main(int argc, char *argv[])
 		printf("Serial init done and fd = %d\n", fd);
 	}
 
+	//set GPIO1 input mode
+	pinMode(1, INPUT);
+
 	//g_trackbarSlider = 0;
 	//cv::namedWindow("TKB");
 	//cv::createTrackbar("trackBar", "ORG", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
@@ -75,8 +78,8 @@ int main(int argc, char *argv[])
     act::Timestamp timer;
     while (1)
     {
-        __TIMER_PRINT__;
-        __TIMER_START__;
+        //__TIMER_PRINT__;
+        //__TIMER_START__;
 
 		////test part
 		//cam0.setExposureValue(false, g_testValue);
@@ -90,21 +93,26 @@ int main(int argc, char *argv[])
 		//sort to three area
 		cam0.areaSort(cam0.getNoBGBallImage());
 
+		serialPutchar(fd, (unsigned char)cam0.targetArea);
+
 		//show all images that have been used
 		cam0.showImage();
 
+		//if GPIO1 get a 3.3v, shutdown the raspberryPi
+		if (digitalRead(1) == HIGH)
+		{
+			if (system("shutdown -h now") == 1)
+			{
+				std::cout << "ready for shutdown" << std::endl;
+			}
+			else
+			{
+				std::cout << "shutdown failed!" << std::endl;
+			}
+		}
 		//if push down Esc, kill the progress
         if (cv::waitKey(10) == 27)
         {
-			//if (system("shutdown -h now") == 1)
-			//{
-			//	std::cout << "ready for shutdown" << std::endl;
-			//}
-			//else
-			//{
-			//	std::cout << "shutdown failed!" << std::endl;
-			//}
-
 			break;
         }
     }
