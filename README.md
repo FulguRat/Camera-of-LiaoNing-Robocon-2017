@@ -13,3 +13,6 @@ Golf ball recognition in LiaoNing robot contest 2017
 6. 完成开关机及程序挂掉自动重启脚本
    * 定时重启未实现
 7. 尝试HSV+BGR的颜色判定方式
+8. 启动报错，错误信息见手机
+9. 重新调参数
+

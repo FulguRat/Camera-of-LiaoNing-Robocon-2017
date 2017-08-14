@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
 
 	//set GPIO1 input mode
 	pinMode(1, INPUT);
+	int shutdownCounter = 0;
+	int shutdownFlag = digitalRead(1);
 
 	//g_trackbarSlider = 0;
 	//cv::namedWindow("TKB");
@@ -93,13 +95,23 @@ int main(int argc, char *argv[])
 		//sort to three area
 		cam0.areaSort(cam0.getNoBGBallImage());
 
+		//send data from serial
 		serialPutchar(fd, (unsigned char)cam0.targetArea);
 
 		//show all images that have been used
 		cam0.showImage();
 
-		//if GPIO1 get a 3.3v, shutdown the raspberryPi
-		if (digitalRead(1) == HIGH)
+		//if GPIO1 change its voltage, shutdown the raspberryPi
+		if (digitalRead(1) == shutdownFlag)
+		{
+			shutdownCounter = 0;
+		}
+		else
+		{
+			shutdownCounter++;
+		}
+
+		if (shutdownCounter >= 3)
 		{
 			if (system("shutdown -h now") == 1)
 			{
@@ -109,7 +121,9 @@ int main(int argc, char *argv[])
 			{
 				std::cout << "shutdown failed!" << std::endl;
 			}
+			shutdownCounter = 0;
 		}
+
 		//if push down Esc, kill the progress
         if (cv::waitKey(10) == 27)
         {

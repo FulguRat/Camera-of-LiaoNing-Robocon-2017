@@ -137,9 +137,6 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 
 void act::Camera::getImage()
 {
-	auto col_val = new min_max[originalImage(ROIRect).rows];
-	auto row_val = new min_max[originalImage(ROIRect).cols];
-
 	//get basic image for later handle
 	basicImage = originalImage(ROIRect).clone();
 	cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
@@ -157,7 +154,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[1] < 70 && pix[2] > 185) || pix[2] < 110)
+			if ((pix[1] < 60 && pix[2] > 185) || pix[2] < 110)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -172,8 +169,8 @@ void act::Camera::getImage()
 		{
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
-			//green field and orange border, red/blue(storeroom), fix me
-			if ((pix[0] > 60 && pix[0] < 140) || (pix[0] < 30 && pix[1] > 100 && pix[1] < 200 && pix[2] > 100))
+			//green field, may should add orange/red/blue, fix me
+			if (pix[0] > 90 && pix[0] < 140)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
@@ -255,12 +252,9 @@ void act::Camera::getImage()
 	//find connected components and get rid of oversize and undersize parts in noBGBallImage
 	findConnectedComponents(noBGBallImage);
 
-	//image processing of allBallImage
-	cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
-	cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
-
-	delete[] col_val;
-	delete[] row_val;
+	////image processing of allBallImage
+	//cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
+	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
 }
 
 void act::Camera::areaSort(cv::Mat ballImage)
@@ -305,7 +299,9 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	}
 
 	//need better judging condition, fix me
-	if (areaLNum >= areaRNum && areaLNum > areaMNum)
+	if (areaLNum == areaRNum && areaRNum == areaMNum && areaMNum == 0)
+		targetArea = 0;
+	else if (areaLNum >= areaRNum && areaLNum > areaMNum)
 		targetArea = 1;
 	else if (areaMNum >= areaRNum && areaMNum >= areaLNum)
 		targetArea = 2;
