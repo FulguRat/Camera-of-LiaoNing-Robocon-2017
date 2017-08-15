@@ -49,6 +49,8 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 	unsigned int counter = 0;
 	unsigned long long coreX = 0;
 	unsigned long long coreY = 0;
+	min_max xVal(320, 0);
+	min_max yVal(240, 0);
 
 	for (auto i = 0; i < bin.rows; ++i)
 	{
@@ -74,6 +76,10 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 				counter++;
 				coreX += pix.x;
 				coreY += pix.y;
+				xVal.min = pix.x < xVal.min ? pix.x : xVal.min;
+				xVal.max = pix.x > xVal.max ? pix.x : xVal.max;
+				yVal.min = pix.y < yVal.min ? pix.y : yVal.min;
+				yVal.max = pix.y > yVal.max ? pix.y : yVal.max;
 
 				auto row_0 = pix.y - 1, row_1 = pix.y, row_2 = pix.y + 1;
 				auto col_0 = pix.x - 1, col_1 = pix.x, col_2 = pix.x + 1;
@@ -108,8 +114,9 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 				coreY /= counter;
 				CCCore.push_back(cv::Point((int)coreX, (int)coreY));
 
-				//if pix number size up or CC is too far, push pix num into CCSize, else pop x and y out from CCCore
-				if ((counter < 0.5f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1)
+				//if pix number size up/CC is too far/shape is wrong, push pix num into CCSize, else pop x and y out from CCCore
+				if ((counter < 0.5f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1 ||
+					(xVal.max - xVal.min) * (yVal.max - yVal.min) > 2.5f * (float)counter)
 				{
 					CCCore.pop_back();				
 				}
@@ -118,6 +125,11 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 			}
 			coreX = 0;
 			coreY = 0;
+
+			xVal.min = 320;
+			xVal.max = 0;
+			yVal.min = 240;
+			yVal.max = 0;
 
 			farFlag = 0;
 			counter = 0;
