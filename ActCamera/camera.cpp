@@ -191,7 +191,7 @@ void act::Camera::getImage()
 
 	//findContours
 	size_t maxCtsSize = 0;
-	int maxCtsNumber = 0;
+	int maxCtsNumber = -1;
 
 	fieldCtsImage = allGreenImage.clone();
 	cv::findContours(fieldCtsImage, fieldContours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
@@ -204,69 +204,79 @@ void act::Camera::getImage()
 		}
 	}
 
-	int CtsCount = fieldContours[maxCtsNumber].size();
-	cv::Point point0Cts = fieldContours[maxCtsNumber][CtsCount - 1];
-	for (int i = 0; i < CtsCount; i++)
+	//if there are contours of field
+	if (maxCtsNumber >= 0)
 	{
-		cv::Point pointCts = fieldContours[maxCtsNumber][i];
-		cv::line(fieldCtsImage, point0Cts, pointCts, cv::Scalar(255));
-		point0Cts = pointCts;
-	}
-
-	//get convex hull of the field
-	fieldCHImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
-	if (CtsCount > 0)
-	{
-		std::vector<cv::Point> hull;
-		convexHull(fieldContours[maxCtsNumber], hull);
-
-		int hullCount = hull.size();
-		cv::Point point0CC = hull[hullCount - 1];
-		for (int i = 0; i < hullCount; i++)
+		//draw contours
+		int CtsCount = fieldContours[maxCtsNumber].size();
+		cv::Point point0Cts = fieldContours[maxCtsNumber][CtsCount - 1];
+		for (int i = 0; i < CtsCount; i++)
 		{
-			cv::Point pointCC = hull[i];
-			cv::line(fieldCHImage, point0CC, pointCC, cv::Scalar(255));
-			point0CC = pointCC;
+			cv::Point pointCts = fieldContours[maxCtsNumber][i];
+			cv::line(fieldCtsImage, point0Cts, pointCts, cv::Scalar(255));
+			point0Cts = pointCts;
 		}
-	}
 
-	//delete the part outside the convex hull of allBallImage
-	noBGBallImage = allBallImage.clone();
-	for (auto i = 0; i < fieldCHImage.rows; i++)
-		for (auto j = 0; j < fieldCHImage.cols; j++)
+		//get convex hull of the field
+		fieldCHImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+		if (CtsCount > 0)
 		{
-			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-				break;
+			std::vector<cv::Point> hull;
+			convexHull(fieldContours[maxCtsNumber], hull);
+
+			int hullCount = hull.size();
+			cv::Point point0CC = hull[hullCount - 1];
+			for (int i = 0; i < hullCount; i++)
+			{
+				cv::Point pointCC = hull[i];
+				cv::line(fieldCHImage, point0CC, pointCC, cv::Scalar(255));
+				point0CC = pointCC;
+			}
 		}
-	for (auto i = 0; i < fieldCHImage.rows; i++)
-		for (auto j = fieldCHImage.cols - 1; j >= 0; j--)
-		{
-			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-				break;
-		}
-	for (auto j = 0; j < fieldCHImage.cols; j++)
+
+		//delete the part outside the convex hull of allBallImage
+		noBGBallImage = allBallImage.clone();
 		for (auto i = 0; i < fieldCHImage.rows; i++)
-		{
-			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-				break;
-		}
-	for (auto j = 0; j < fieldCHImage.cols; j++)
-		for (auto i = fieldCHImage.rows - 1; i >= 0; i--)
-		{
-			*noBGBallImage.ptr<uchar>(i, j) = 0;
-			if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-				break;
-		}
-	
-	//find connected components and get rid of oversize and undersize parts in noBGBallImage
-	findConnectedComponents(noBGBallImage);
+			for (auto j = 0; j < fieldCHImage.cols; j++)
+			{
+				*noBGBallImage.ptr<uchar>(i, j) = 0;
+				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
+					break;
+			}
+		for (auto i = 0; i < fieldCHImage.rows; i++)
+			for (auto j = fieldCHImage.cols - 1; j >= 0; j--)
+			{
+				*noBGBallImage.ptr<uchar>(i, j) = 0;
+				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
+					break;
+			}
+		for (auto j = 0; j < fieldCHImage.cols; j++)
+			for (auto i = 0; i < fieldCHImage.rows; i++)
+			{
+				*noBGBallImage.ptr<uchar>(i, j) = 0;
+				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
+					break;
+			}
+		for (auto j = 0; j < fieldCHImage.cols; j++)
+			for (auto i = fieldCHImage.rows - 1; i >= 0; i--)
+			{
+				*noBGBallImage.ptr<uchar>(i, j) = 0;
+				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
+					break;
+			}
 
-	////image processing of allBallImage
-	//cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
-	//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
+		////image processing of allBallImage
+		//cv::Mat element = getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
+		//cv::morphologyEx(noBGBallImage, noBGBallImage, CV_MOP_CLOSE, element);
+
+		//find connected components and get rid of oversize and undersize parts in noBGBallImage
+		findConnectedComponents(noBGBallImage);
+	}
+	else
+	{
+		fieldCHImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+		noBGBallImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+	}
 }
 
 void act::Camera::areaSort(cv::Mat ballImage)
@@ -286,9 +296,9 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
 
 		//judge the number of golf ball in this connected component
-		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.5f * STD_PIXS)
+		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
 			incNum = 1;
-		else if ((float)CCSize.back() > 1.5f * STD_PIXS && (float)CCSize.back() <= 2.25f * STD_PIXS)
+		else if ((float)CCSize.back() > 1.4f * STD_PIXS && (float)CCSize.back() <= 2.25f * STD_PIXS)
 			incNum = 2;
 		else if ((float)CCSize.back() > 2.25f * STD_PIXS)
 			incNum = 3;
