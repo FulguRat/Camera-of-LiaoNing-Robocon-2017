@@ -91,6 +91,9 @@ namespace act
         int ROICols = 0;
         int ROIRows = 0;
 
+		int areaLNum = 0;
+		int areaMNum = 0;
+		int areaRNum = 0;
 		int targetArea = 0;
 
     private:

@@ -281,19 +281,22 @@ void act::Camera::getImage()
 
 void act::Camera::areaSort(cv::Mat ballImage)
 {
-	//modify with macro ROWS_CUTS
-	cv::line(ballImage, cv::Point(128, 0), cv::Point(0  , 90), cv::Scalar(255));
-	cv::line(ballImage, cv::Point(193, 0), cv::Point(320, 98), cv::Scalar(255));
+	//if ROWS_CUTS > 80, there will be segment fault, fix me
+	cv::line(ballImage, cv::Point(141, 80 - ROWS_CUTS), cv::Point(3  , 240 - ROWS_CUTS), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(191, 80 - ROWS_CUTS), cv::Point(318, 240 - ROWS_CUTS), cv::Scalar(255));
 
-	int areaLNum = 0, areaMNum = 0, areaRNum = 0, incNum = 0;
+	int incNum = 0;
+
+	areaLNum = 0;
+	areaMNum = 0;
+	areaRNum = 0;
 
 	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
 
 	while (!CCSize.empty() && !CCCore.empty())
 	{
-		//modify with macro ROWS_CUTS
-		double borderXLeft = 128.44f - 1.43f * (float)CCCore.back().y;
-		double borderXRight = 192.76f + 1.3f * (float)CCCore.back().y;
+		double borderXLeft  = 209.72f - 0.86f * ((float)CCCore.back().y + ROWS_CUTS);
+		double borderXRight = 128.25f + 0.79f * ((float)CCCore.back().y + ROWS_CUTS);
 
 		//judge the number of golf ball in this connected component
 		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
@@ -333,8 +336,4 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		targetArea = 2;
 
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
-
-	areaLNum = 0;
-	areaMNum = 0;
-	areaRNum = 0;
 }

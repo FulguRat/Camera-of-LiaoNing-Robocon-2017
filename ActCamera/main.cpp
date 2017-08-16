@@ -57,14 +57,14 @@ int main(int argc, char *argv[])
 
 	//initialization wiringPi and serial
 	wiringPiSetup();
-	int fd;
-	if ((fd = serialOpen("/dev/ttyAMA0", 115200)) < 0)
+	int fdSerial;
+	if ((fdSerial = serialOpen("/dev/ttyAMA0", 115200)) < 0)
 	{
 		fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
 	}
 	else
 	{
-		printf("Serial init done and fd = %d\n", fd);
+		printf("Serial init done and fdSerial = %d\n", fdSerial);
 	}
 
 	//set GPIO1 input mode
@@ -96,7 +96,10 @@ int main(int argc, char *argv[])
 		cam0.areaSort(cam0.getNoBGBallImage());
 
 		//send data from serial
-		serialPutchar(fd, (unsigned char)cam0.targetArea);
+		serialPutchar(fdSerial, 0x42);
+		serialPutchar(fdSerial, (unsigned char)cam0.areaLNum);
+		serialPutchar(fdSerial, (unsigned char)cam0.areaMNum);
+		serialPutchar(fdSerial, (unsigned char)cam0.areaRNum);
 
 		//show all images that have been used
 		cam0.showImage();
@@ -140,16 +143,16 @@ std::vector<int> getCameraList(int size)
 
 	//traversal 50 devices
 	char name[15] = "/dev/video";
-	int fd = 0;
+	int fdCamera = 0;
 
 	for (int i = 0; i < 50 && list.size() < 1; ++i)
 	{
 		sprintf(&name[10], "%d", i);
 
-		if ((fd = open(name, O_RDWR | O_NONBLOCK, 0)) != -1)
+		if ((fdCamera = open(name, O_RDWR | O_NONBLOCK, 0)) != -1)
 		{
 			list.push_back(i);
-			close(fd);
+			close(fdCamera);
 		}
 	}
 
