@@ -69,7 +69,7 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 				auto pix = stk_white.back();
 				
 				//if this connected component is too away from comera, get rid of it
-				if (pix.y <= 5)
+				if (pix.y <= 3)
 					farFlag = 1;
 
 				stk_white.pop_back();
@@ -281,9 +281,9 @@ void act::Camera::getImage()
 
 void act::Camera::areaSort(cv::Mat ballImage)
 {
-	//if ROWS_CUTS > 80, there will be segment fault, fix me
-	cv::line(ballImage, cv::Point(141, 80 - ROWS_CUTS), cv::Point(3  , 240 - ROWS_CUTS), cv::Scalar(255));
-	cv::line(ballImage, cv::Point(191, 80 - ROWS_CUTS), cv::Point(318, 240 - ROWS_CUTS), cv::Scalar(255));
+	//if ROWS_CUTS > 80, there will be segment fault
+	cv::line(ballImage, cv::Point(143, 80 - ROWS_CUTS), cv::Point(8  , 240 - ROWS_CUTS), cv::Scalar(255));
+	cv::line(ballImage, cv::Point(189, 80 - ROWS_CUTS), cv::Point(316, 240 - ROWS_CUTS), cv::Scalar(255));
 
 	int incNum = 0;
 
@@ -295,8 +295,8 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 	while (!CCSize.empty() && !CCCore.empty())
 	{
-		double borderXLeft  = 209.72f - 0.86f * ((float)CCCore.back().y + ROWS_CUTS);
-		double borderXRight = 128.25f + 0.79f * ((float)CCCore.back().y + ROWS_CUTS);
+		double borderXLeft  = 210.5f - 0.8421f * ((float)CCCore.back().y + ROWS_CUTS);
+		double borderXRight = 126.2f + 0.79f   * ((float)CCCore.back().y + ROWS_CUTS);
 
 		//judge the number of golf ball in this connected component
 		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
