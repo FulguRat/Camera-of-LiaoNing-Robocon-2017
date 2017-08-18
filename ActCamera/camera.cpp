@@ -52,6 +52,8 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 	min_max xVal(320, 0);
 	min_max yVal(240, 0);
 
+	CCCounter = 0;
+
 	for (auto i = 0; i < bin.rows; ++i)
 	{
 		for (auto j = 0; j < bin.cols; ++j)
@@ -121,7 +123,10 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 					CCCore.pop_back();				
 				}
 				else
-					CCSize.push_back(counter);	
+				{
+					CCSize.push_back(counter);
+					CCCounter++;
+				}
 			}
 			coreX = 0;
 			coreY = 0;
@@ -293,7 +298,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
 
-	while (!CCSize.empty() && !CCCore.empty())
+	while (!CCSize.empty() || !CCCore.empty())
 	{
 		double borderXLeft  = 210.5f - 0.8421f * ((float)CCCore.back().y + ROWS_CUTS);
 		double borderXRight = 126.2f + 0.79f   * ((float)CCCore.back().y + ROWS_CUTS);
@@ -322,6 +327,11 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		CCSize.pop_back();
 		CCCore.pop_back();
 	}
+	while (!CCSize.empty() && !CCCore.empty())
+	{
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
 
 	//need better judging condition, fix me
 	if (areaLNum == areaRNum && areaRNum == areaMNum && areaMNum == 0)
@@ -336,4 +346,36 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		targetArea = 2;
 
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
+}
+
+void act::Camera::calcPosition(void)
+{
+	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+
+	while (!CCSize.empty() || !CCCore.empty())
+	{
+		CCAng.push_back((unsigned char)(((160 - (int)CCCore.back().x) * 25 / 160) + ANG_ERR));
+		CCDist.push_back((unsigned char)
+			(0.018f * (float)CCCore.back().y * (float)CCCore.back().y - 3.352f * (float)CCCore.back().y + 216.0f));
+
+		//judge the number of golf ball in this connected component
+		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
+			CCBNum.push_back(1);
+		else if ((float)CCSize.back() > 1.4f * STD_PIXS && (float)CCSize.back() <= 2.25f * STD_PIXS)
+			CCBNum.push_back(2);
+		else if ((float)CCSize.back() > 2.25f * STD_PIXS)
+			CCBNum.push_back(3);
+		else
+			CCBNum.push_back(0);
+
+		cv::circle(ballPositionImage, CCCore.back(), 5, 255, 1);
+
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
+	while (!CCSize.empty() && !CCCore.empty())
+	{
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
 }

@@ -8,7 +8,7 @@
 #include <errno.h>
 
 #define ROWS_CUTS 80
-
+#define ANG_ERR 1
 #define STD_PIXS (0.067f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
                   8.28f * ((float)CCCore.back().y + ROWS_CUTS) + 273.22f)
 
@@ -77,6 +77,8 @@ namespace act
 
 		void areaSort(cv::Mat ballImage);
 
+		void calcPosition(void);
+
 		struct min_max
 		{
 			min_max() {}
@@ -95,6 +97,11 @@ namespace act
 		int areaMNum = 0;
 		int areaRNum = 0;
 		int targetArea = 0;
+
+		unsigned int CCCounter = 0;
+		std::vector<unsigned char> CCAng;
+		std::vector<unsigned char> CCDist;
+		std::vector<unsigned int> CCBNum;
 
     private:
         cv::VideoCapture videoCapture;
