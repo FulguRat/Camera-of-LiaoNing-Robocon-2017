@@ -6,6 +6,7 @@
 #include "videoconfig.h"
 #include "camera.h"
 
+//#define FIRST_WAY
 
 //calculate time of every circulation
 #define __TIMER_START__ timer.start()
@@ -92,6 +93,8 @@ int main(int argc, char *argv[])
 		//get usdful image
 		cam0.getImage();
 
+#ifdef FIRST_WAY
+
 		//sort to three area
 		cam0.areaSort(cam0.getNoBGBallImage());
 
@@ -100,6 +103,16 @@ int main(int argc, char *argv[])
 		serialPutchar(fdSerial, (unsigned char)cam0.areaLNum);
 		serialPutchar(fdSerial, (unsigned char)cam0.areaMNum);
 		serialPutchar(fdSerial, (unsigned char)cam0.areaRNum);
+
+#else
+
+		//find the angle with most golf ball
+		cam0.findOptimalAngle();
+
+		//send data from serial
+		serialPutchar(fdSerial, (unsigned char)cam0.optimalAngle);
+
+#endif
 
 		//show all images that have been used
 		cam0.showImage();

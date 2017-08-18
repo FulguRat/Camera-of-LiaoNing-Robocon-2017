@@ -77,6 +77,8 @@ namespace act
 
 		void areaSort(cv::Mat ballImage);
 
+		void findOptimalAngle(void);
+
 		struct min_max
 		{
 			min_max() {}
@@ -95,6 +97,8 @@ namespace act
 		int areaMNum = 0;
 		int areaRNum = 0;
 		int targetArea = 0;
+
+		int optimalAngle = 0;
 
     private:
         cv::VideoCapture videoCapture;
@@ -132,6 +136,8 @@ namespace act
 
 		std::vector<int> CCSize;
 		std::vector<cv::Point> CCCore;
+
+		unsigned int ballNumByX[320] = { 0 };
 
         int usbNumber = 0;
     };

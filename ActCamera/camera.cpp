@@ -293,7 +293,7 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
 
-	while (!CCSize.empty() && !CCCore.empty())
+	while (!CCSize.empty() || !CCCore.empty())
 	{
 		double borderXLeft  = 210.5f - 0.8421f * ((float)CCCore.back().y + ROWS_CUTS);
 		double borderXRight = 126.2f + 0.79f   * ((float)CCCore.back().y + ROWS_CUTS);
@@ -322,6 +322,11 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		CCSize.pop_back();
 		CCCore.pop_back();
 	}
+	while (!CCSize.empty() && !CCCore.empty())
+	{
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
 
 	//need better judging condition, fix me
 	if (areaLNum == areaRNum && areaRNum == areaMNum && areaMNum == 0)
@@ -336,4 +341,67 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		targetArea = 2;
 
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
+}
+
+void act::Camera::findOptimalAngle(void)
+{
+	int incNum = 0;
+	int minX = 0;
+	int maxX = 0;
+
+	int maxBallNum = 0;
+	int minXWithMaxBall = 0;
+	int xNumWithMaxBall = 0;
+
+	
+	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+
+	while (!CCSize.empty() || !CCCore.empty())
+	{
+		//judge the number of golf ball in this connected component
+		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
+			incNum = 1;
+		else if ((float)CCSize.back() > 1.4f * STD_PIXS && (float)CCSize.back() <= 2.25f * STD_PIXS)
+			incNum = 2;
+		else if ((float)CCSize.back() > 2.25f * STD_PIXS)
+			incNum = 3;
+		else
+			incNum = 0;
+		
+		minX = CCCore.back().x - 7 > 0   ? CCCore.back().x - 7 : 0  ;
+		maxX = CCCore.back().x + 7 < 320 ? CCCore.back().x + 7 : 320;
+		for (int i = minX; i < maxX; i++)
+		{
+			ballNumByX[i] += incNum;
+		}
+
+		cv::circle(ballPositionImage, CCCore.back(), 5, 255, 1);
+
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
+	while (!CCSize.empty() && !CCCore.empty())
+	{
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
+
+	for (int i = 0; i < 320; i++)
+	{
+		if (ballNumByX[i] > maxBallNum)
+		{
+			maxBallNum = ballNumByX[i];
+			minXWithMaxBall = i;
+			xNumWithMaxBall = 0;
+			while (ballNumByX[i] == maxBallNum)
+			{
+				xNumWithMaxBall++;
+				i++;
+				if (i >= 320)
+					break;
+			}
+		}
+	}
+
+	optimalAngle = 160 - (minXWithMaxBall + xNumWithMaxBall / 2) * 50 / 320;
 }
