@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 		serialPutchar(fdSerial, 0xC8);
 		for (unsigned int i = 0; i < cam0.CCCounter; i++)
 		{
-			for (unsigned int j = 0; j < cam0.CCBNum.back(); j++)
+			for (size_t j = 0; j < cam0.CCBNum.size(); j++)
 			{
 				serialPutchar(fdSerial, (unsigned char)cam0.CCAng.back());
 				std::cout << " ang " << (unsigned int)cam0.CCAng.back();

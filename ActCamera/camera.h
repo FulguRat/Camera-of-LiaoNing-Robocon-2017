@@ -6,6 +6,7 @@
 #include <wiringPi.h>
 #include <wiringSerial.h>
 #include <errno.h>
+#include <math.h>
 
 #define ROWS_CUTS 80
 #define ANG_ERR 1

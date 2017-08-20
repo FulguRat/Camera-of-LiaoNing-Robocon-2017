@@ -355,8 +355,8 @@ void act::Camera::calcPosition(void)
 	while (!CCSize.empty() || !CCCore.empty())
 	{
 		CCAng.push_back((unsigned char)(((160 - (int)CCCore.back().x) * 25 / 160) + ANG_ERR));
-		CCDist.push_back((unsigned char)
-			(0.018f * (float)CCCore.back().y * (float)CCCore.back().y - 3.352f * (float)CCCore.back().y + 216.0f));
+		CCDist.push_back((unsigned char)(-0.00022f * pow((float)CCCore.back().y, 3) + 0.06142f * pow((float)CCCore.back().y, 2) - 
+			6.18f * (float)CCCore.back().y + 281.7f));
 
 		//judge the number of golf ball in this connected component
 		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
