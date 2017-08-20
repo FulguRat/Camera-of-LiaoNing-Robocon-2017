@@ -14,5 +14,7 @@ Golf ball recognition in LiaoNing robot contest 2017
 7. 守护进程
 8. 读论文寻找更好的返回坐标方式
 9. raspberry DMA
+10. 注意可能看到储藏室里的球和网兜里的球、
+11. 两条线卡球的最大距离范围
 
 

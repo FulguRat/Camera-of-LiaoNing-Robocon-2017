@@ -65,13 +65,14 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
+		act::getFdSerial(fdSerial);
 		printf("Serial init done and fdSerial = %d\n", fdSerial);
 	}
 
 	//set GPIO1 input mode
-	pinMode(1, INPUT);
+	pinMode(0, INPUT);
 	int shutdownCounter = 0;
-	int shutdownFlag = digitalRead(1);
+	int shutdownFlag = digitalRead(0);
 
 	//g_trackbarSlider = 0;
 	//cv::namedWindow("TKB");
@@ -99,31 +100,31 @@ int main(int argc, char *argv[])
 		cam0.areaSort(cam0.getNoBGBallImage());
 
 		//send data from serial
-		serialPutchar(fdSerial, 0x42);
-		serialPutchar(fdSerial, (unsigned char)cam0.areaLNum);
-		serialPutchar(fdSerial, (unsigned char)cam0.areaMNum);
-		serialPutchar(fdSerial, (unsigned char)cam0.areaRNum);
+		serialPutchar(act::setFdSerial(), 0x42);
+		serialPutchar(act::setFdSerial(), (unsigned char)cam0.areaLNum);
+		serialPutchar(act::setFdSerial(), (unsigned char)cam0.areaMNum);
+		serialPutchar(act::setFdSerial(), (unsigned char)cam0.areaRNum);
 
 #else   /*send out distance and angle of every golf ball*/
 
 		cam0.calcPosition();
 
-		serialPutchar(fdSerial, 0xC8);
+		serialPutchar(act::setFdSerial(), 0xC8);
 		for (unsigned int i = 0; i < cam0.CCCounter; i++)
 		{
 			for (unsigned int j = 0; j < cam0.CCBNum.back(); j++)
 			{
-				serialPutchar(fdSerial, (unsigned char)cam0.CCAng.back());
+				serialPutchar(act::setFdSerial(), (unsigned char)cam0.CCAng.back());
 				std::cout << " ang " << (unsigned int)cam0.CCAng.back();
 
-				serialPutchar(fdSerial, (unsigned char)cam0.CCDist.back());
+				serialPutchar(act::setFdSerial(), (unsigned char)cam0.CCDist.back());
 				std::cout << "  dist " << (unsigned int)cam0.CCDist.back();
 			}
 			cam0.CCAng.pop_back();
 			cam0.CCDist.pop_back();
 			cam0.CCBNum.pop_back();
 		}
-		serialPutchar(fdSerial, 0xC9);
+		serialPutchar(act::setFdSerial(), 0xC9);
 		std::cout << std::endl;
 
 #endif
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
 		cam0.showImage();
 
 		//if GPIO1 change its voltage, shutdown the raspberryPi
-		if (digitalRead(1) == shutdownFlag)
+		if (digitalRead(0) == shutdownFlag)
 		{
 			shutdownCounter = 0;
 		}

@@ -15,6 +15,20 @@
 
 namespace act
 {
+	//fd Get_Set
+	int tmpFdSerial;
+	void getFdSerial(int fdS)
+	{
+		tmpFdSerial = fdS;
+	}
+	int setFdSerial(void)
+	{
+		return tmpFdSerial;
+	}
+
+	//=======================================================================================
+	//                            definition of Camera class                                 
+	//=======================================================================================
 	class Camera : public VCConfig
     {
     public:
@@ -30,13 +44,6 @@ namespace act
             cv::Mat temp;
             videoCapture >> temp;
             originalImage = temp.clone();
-     //       for (auto i = 0; i < temp.rows; ++i)
-     //       {
-     //           for (auto j = 0; j < temp.cols; ++j)
-     //           {
-					//originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
-     //           }
-     //       }
         }
 
 		void getImage();
