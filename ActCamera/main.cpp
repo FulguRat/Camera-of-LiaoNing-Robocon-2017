@@ -6,7 +6,9 @@
 #include "videoconfig.h"
 #include "camera.h"
 
-//#define FIRST_WAY
+//#define SEND_AREA
+#define SEND_ANGLE
+//#define SEND_COOR
 
 //calculate time of every circulation
 #define __TIMER_START__ timer.start()
@@ -94,15 +96,20 @@ int main(int argc, char *argv[])
 		//get usdful image
 		cam0.getImage();
 
-#ifdef FIRST_WAY   
+#ifdef SEND_AREA  
 
 		/*sort to three area and send golf ball num in every area*/
 		cam0.areaSort(cam0.getNoBGBallImage());
 
-#else   
+#elif defined SEND_ANGLE
+
+
+#elif defined SEND_COOR  
 
 		/*send out distance and angle of every golf ball*/
 		cam0.calcPosition();
+
+#else
 
 #endif
 
