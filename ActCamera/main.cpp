@@ -94,38 +94,15 @@ int main(int argc, char *argv[])
 		//get usdful image
 		cam0.getImage();
 
-#ifdef FIRST_WAY   /*sort to three area and send golf ball num in every area*/
+#ifdef FIRST_WAY   
 
-		//sort to three area
+		/*sort to three area and send golf ball num in every area*/
 		cam0.areaSort(cam0.getNoBGBallImage());
 
-		//send data from serial
-		serialPutchar(act::setFdSerial(), 0x42);
-		serialPutchar(act::setFdSerial(), (unsigned char)cam0.areaLNum);
-		serialPutchar(act::setFdSerial(), (unsigned char)cam0.areaMNum);
-		serialPutchar(act::setFdSerial(), (unsigned char)cam0.areaRNum);
+#else   
 
-#else   /*send out distance and angle of every golf ball*/
-
+		/*send out distance and angle of every golf ball*/
 		cam0.calcPosition();
-
-		serialPutchar(act::setFdSerial(), 0xC8);
-		for (unsigned int i = 0; i < cam0.CCCounter; i++)
-		{
-			for (unsigned int j = 0; j < cam0.CCBNum.back(); j++)
-			{
-				serialPutchar(act::setFdSerial(), (unsigned char)cam0.CCAng.back());
-				std::cout << " ang " << (unsigned int)cam0.CCAng.back();
-
-				serialPutchar(act::setFdSerial(), (unsigned char)cam0.CCDist.back());
-				std::cout << "  dist " << (unsigned int)cam0.CCDist.back();
-			}
-			cam0.CCAng.pop_back();
-			cam0.CCDist.pop_back();
-			cam0.CCBNum.pop_back();
-		}
-		serialPutchar(act::setFdSerial(), 0xC9);
-		std::cout << std::endl;
 
 #endif
 

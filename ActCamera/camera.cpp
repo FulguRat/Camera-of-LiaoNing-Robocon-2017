@@ -345,6 +345,11 @@ void act::Camera::areaSort(cv::Mat ballImage)
 	else
 		targetArea = 2;
 
+	//send data from serial
+	serialPutchar(act::setFdSerial(), 0x42);
+	serialPutchar(act::setFdSerial(), (unsigned char)areaLNum);
+	serialPutchar(act::setFdSerial(), (unsigned char)areaMNum);
+	serialPutchar(act::setFdSerial(), (unsigned char)areaRNum);
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
 }
 
@@ -378,4 +383,34 @@ void act::Camera::calcPosition(void)
 		CCSize.pop_back();
 		CCCore.pop_back();
 	}
+
+	//send data from serial
+	serialPutchar(act::setFdSerial(), 0xC8);
+	for (unsigned int i = 0; i < CCCounter; i++)
+	{
+		for (unsigned int j = 0; j < CCBNum.back(); j++)
+		{
+			serialPutchar(act::setFdSerial(), (unsigned char)CCAng.back());
+			std::cout << " ang " << (unsigned int)CCAng.back();
+
+			serialPutchar(act::setFdSerial(), (unsigned char)CCDist.back());
+			std::cout << "  dist " << (unsigned int)CCDist.back();
+		}
+		CCAng.pop_back();
+		CCDist.pop_back();
+		CCBNum.pop_back();
+	}
+	serialPutchar(act::setFdSerial(), 0xC9);
+	std::cout << std::endl;
+}
+
+//Fd Get_Set
+int tmpFdSerial = 0;
+void act::getFdSerial(int fdS)
+{
+	tmpFdSerial = fdS;
+}
+int act::setFdSerial(void)
+{
+	return tmpFdSerial;
 }

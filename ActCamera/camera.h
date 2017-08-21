@@ -16,15 +16,8 @@
 namespace act
 {
 	//fd Get_Set
-	int tmpFdSerial;
-	void getFdSerial(int fdS)
-	{
-		tmpFdSerial = fdS;
-	}
-	int setFdSerial(void)
-	{
-		return tmpFdSerial;
-	}
+	void getFdSerial(int fdS);
+	int setFdSerial(void);
 
 	//=======================================================================================
 	//                            definition of Camera class                                 
@@ -101,16 +94,6 @@ namespace act
         int ROICols = 0;
         int ROIRows = 0;
 
-		int areaLNum = 0;
-		int areaMNum = 0;
-		int areaRNum = 0;
-		int targetArea = 0;
-
-		unsigned int CCCounter = 0;
-		std::vector<unsigned char> CCAng;
-		std::vector<unsigned char> CCDist;
-		std::vector<unsigned int> CCBNum;
-
     private:
         cv::VideoCapture videoCapture;
 		
@@ -147,6 +130,16 @@ namespace act
 
 		std::vector<int> CCSize;
 		std::vector<cv::Point> CCCore;
+
+		int areaLNum = 0;
+		int areaMNum = 0;
+		int areaRNum = 0;
+		int targetArea = 0;
+
+		unsigned int CCCounter = 0;
+		std::vector<unsigned char> CCAng;
+		std::vector<unsigned char> CCDist;
+		std::vector<unsigned int> CCBNum;
 
         int usbNumber = 0;
     };
