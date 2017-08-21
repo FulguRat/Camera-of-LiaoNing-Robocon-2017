@@ -98,15 +98,17 @@ int main(int argc, char *argv[])
 
 #ifdef SEND_AREA  
 
-		/*sort to three area and send golf ball num in every area*/
+		//sort to three area and send golf ball num in every area
 		cam0.areaSort(cam0.getNoBGBallImage());
 
 #elif defined SEND_ANGLE
 
+		//find the angle with most golf ball
+		cam0.findOptimalAngle();
 
 #elif defined SEND_COOR  
 
-		/*send out distance and angle of every golf ball*/
+		//send out distance and angle of every golf ball
 		cam0.calcPosition();
 
 #else

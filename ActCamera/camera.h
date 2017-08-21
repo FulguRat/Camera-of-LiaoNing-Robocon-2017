@@ -78,6 +78,8 @@ namespace act
 
 		void areaSort(cv::Mat ballImage);
 
+		void findOptimalAngle(void);
+
 		void calcPosition(void);
 
 		struct min_max
@@ -135,6 +137,9 @@ namespace act
 		int areaMNum = 0;
 		int areaRNum = 0;
 		int targetArea = 0;
+
+		unsigned int ballNumByX[320] = { 0 };
+		int optimalAngle = 0;
 
 		unsigned int CCCounter = 0;
 		std::vector<unsigned char> CCAng;
