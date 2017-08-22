@@ -355,6 +355,10 @@ void act::Camera::areaSort(cv::Mat ballImage)
 
 void act::Camera::findOptimalAngle(void)
 {
+	for (int i = 0; i < 320; i++)
+		ballNumByX[i] = 0;
+	optimalAngle = 0;
+	
 	int incNum = 0;
 	int minX = 0;
 	int maxX = 0;
@@ -363,8 +367,12 @@ void act::Camera::findOptimalAngle(void)
 	int minXWithMaxBall = 0;
 	int xNumWithMaxBall = 0;
 
+	bool noBallFlag = 0;
 
 	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+
+	if (CCSize.empty() && CCCore.empty())
+		noBallFlag = 1;
 
 	while (!CCSize.empty() || !CCCore.empty())
 	{
@@ -378,8 +386,8 @@ void act::Camera::findOptimalAngle(void)
 		else
 			incNum = 0;
 
-		minX = CCCore.back().x - 7 > 0 ? CCCore.back().x - 7 : 0;
-		maxX = CCCore.back().x + 7 < 320 ? CCCore.back().x + 7 : 320;
+		minX = CCCore.back().x - 63 > 0 ? CCCore.back().x - 63 : 0;
+		maxX = CCCore.back().x + 64 < 320 ? CCCore.back().x + 64 : 320;
 		for (int i = minX; i < maxX; i++)
 		{
 			ballNumByX[i] += incNum;
@@ -396,24 +404,32 @@ void act::Camera::findOptimalAngle(void)
 		CCCore.pop_back();
 	}
 
-	for (int i = 0; i < 320; i++)
+	if (noBallFlag == 0)
 	{
-		if (ballNumByX[i] > maxBallNum)
+		for (int i = 0; i < 320; i++)
 		{
-			maxBallNum = ballNumByX[i];
-			minXWithMaxBall = i;
-			xNumWithMaxBall = 0;
-			while (ballNumByX[i] == maxBallNum)
+			if (ballNumByX[i] > maxBallNum)
 			{
-				xNumWithMaxBall++;
-				i++;
-				if (i >= 320)
-					break;
+				maxBallNum = ballNumByX[i];
+				minXWithMaxBall = i;
+				xNumWithMaxBall = 0;
+				while (ballNumByX[i] == maxBallNum)
+				{
+					xNumWithMaxBall++;
+					i++;
+					if (i >= 320)
+						break;
+				}
 			}
 		}
-	}
 
-	optimalAngle = (160 - (minXWithMaxBall + xNumWithMaxBall / 2)) * 50 / 320;
+		std::cout << "min x = " << minXWithMaxBall << " x num = " << xNumWithMaxBall << std::endl;
+		optimalAngle = (160 - (minXWithMaxBall + xNumWithMaxBall / 2)) * 50 / 320;
+	}
+	else
+	{
+		optimalAngle = 0;
+	}
 
 	//send data from serial
 	serialPutchar(act::setFdSerial(), (unsigned char)optimalAngle);

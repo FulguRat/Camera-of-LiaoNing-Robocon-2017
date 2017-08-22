@@ -76,10 +76,16 @@ namespace act
 
         void findConnectedComponents(cv::Mat &binary);
 
+		//scheme 1:sort ball to three area and send out area number with most balls
 		void areaSort(cv::Mat ballImage);
 
+		//scheme 2:send out angle with most of balls can be get
 		void findOptimalAngle(void);
 
+		//scheme 3:send out angle and distance of nearest ball
+		void getNearestBall(void);
+
+		//scheme 4:send out angle and distance of every ball
 		void calcPosition(void);
 
 		struct min_max

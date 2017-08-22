@@ -76,6 +76,9 @@ int main(int argc, char *argv[])
 	int shutdownCounter = 0;
 	int shutdownFlag = digitalRead(0);
 
+	pinMode(1, INPUT);
+	pinMode(2, INPUT);
+
 	//g_trackbarSlider = 0;
 	//cv::namedWindow("TKB");
 	//cv::createTrackbar("trackBar", "ORG", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
