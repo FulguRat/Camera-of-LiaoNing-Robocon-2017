@@ -151,6 +151,8 @@ namespace act
 		std::vector<unsigned char> CCAng;
 		std::vector<unsigned char> CCDist;
 		std::vector<unsigned int> CCBNum;
+		unsigned char CCMinDist = 200;
+		unsigned char CCMDAngle = 0;
 
         int usbNumber = 0;
     };

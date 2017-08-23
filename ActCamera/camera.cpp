@@ -346,10 +346,11 @@ void act::Camera::areaSort(cv::Mat ballImage)
 		targetArea = 2;
 
 	//send data from serial
-	serialPutchar(act::setFdSerial(), 0x42);
+	serialPutchar(act::setFdSerial(), 0xDC);
 	serialPutchar(act::setFdSerial(), (unsigned char)areaLNum);
 	serialPutchar(act::setFdSerial(), (unsigned char)areaMNum);
 	serialPutchar(act::setFdSerial(), (unsigned char)areaRNum);
+
 	std::cout << areaLNum << "   " << areaMNum << "   " << areaRNum << "   Target Area:" << targetArea << std::endl;
 }
 
@@ -423,7 +424,6 @@ void act::Camera::findOptimalAngle(void)
 			}
 		}
 
-		std::cout << "min x = " << minXWithMaxBall << " x num = " << xNumWithMaxBall << std::endl;
 		optimalAngle = (160 - (minXWithMaxBall + xNumWithMaxBall / 2)) * 50 / 320;
 	}
 	else
@@ -432,8 +432,57 @@ void act::Camera::findOptimalAngle(void)
 	}
 
 	//send data from serial
+	serialPutchar(act::setFdSerial(), 0xDA);
 	serialPutchar(act::setFdSerial(), (unsigned char)optimalAngle);
+
 	std::cout << "target angle:" << optimalAngle << std::endl;
+}
+
+void act::Camera::getNearestBall(void)
+{
+	CCMinDist = 200;
+	CCMDAngle = 0;
+
+	ballPositionImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+
+	while (!CCSize.empty() || !CCCore.empty())
+	{
+		CCAng.push_back((unsigned char)(((160 - (int)CCCore.back().x) * 25 / 160) + ANG_ERR));
+		CCDist.push_back((unsigned char)(-0.00022f * pow((float)CCCore.back().y, 3) + 0.06142f * pow((float)CCCore.back().y, 2) -
+			6.18f * (float)CCCore.back().y + 281.7f));
+
+		cv::circle(ballPositionImage, CCCore.back(), 5, 255, 1);
+
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
+	while (!CCSize.empty() && !CCCore.empty())
+	{
+		CCSize.pop_back();
+		CCCore.pop_back();
+	}
+
+	for (unsigned int i = 0; i < CCCounter; i++)
+	{
+		if (CCDist.back() < CCMinDist)
+		{
+			CCMinDist = CCDist.back();
+			CCMDAngle = CCAng.back();
+		}
+
+		CCAng.pop_back();
+		CCDist.pop_back();
+	}
+
+	//send data from serial
+	serialPutchar(act::setFdSerial(), 0xD8);
+
+	serialPutchar(act::setFdSerial(), (unsigned char)CCMDAngle);
+	std::cout << " ang " << (unsigned int)CCMDAngle;
+	serialPutchar(act::setFdSerial(), (unsigned char)CCMinDist);
+	std::cout << "  min dist " << (unsigned int)CCMinDist;
+
+	std::cout << std::endl;
 }
 
 void act::Camera::calcPosition(void)
@@ -468,22 +517,25 @@ void act::Camera::calcPosition(void)
 	}
 
 	//send data from serial
-	serialPutchar(act::setFdSerial(), 0xC8);
+	serialPutchar(act::setFdSerial(), 0xC6);
 	for (unsigned int i = 0; i < CCCounter; i++)
 	{
 		for (unsigned int j = 0; j < CCBNum.back(); j++)
 		{
-			serialPutchar(act::setFdSerial(), (unsigned char)CCAng.back());
-			std::cout << " ang " << (unsigned int)CCAng.back();
+			if (CCDist.back() < 190 && CCAng.back() >= -25 && CCAng.back() <= 25)
+			{
+				serialPutchar(act::setFdSerial(), (unsigned char)CCAng.back());
+				std::cout << " ang " << (unsigned int)CCAng.back();
 
-			serialPutchar(act::setFdSerial(), (unsigned char)CCDist.back());
-			std::cout << "  dist " << (unsigned int)CCDist.back();
+				serialPutchar(act::setFdSerial(), (unsigned char)CCDist.back());
+				std::cout << "  dist " << (unsigned int)CCDist.back();
+			}
 		}
 		CCAng.pop_back();
 		CCDist.pop_back();
 		CCBNum.pop_back();
 	}
-	serialPutchar(act::setFdSerial(), 0xC9);
+	serialPutchar(act::setFdSerial(), 0xC5);
 	std::cout << std::endl;
 }
 

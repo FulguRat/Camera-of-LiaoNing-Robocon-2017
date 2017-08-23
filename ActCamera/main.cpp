@@ -6,10 +6,6 @@
 #include "videoconfig.h"
 #include "camera.h"
 
-//#define SEND_AREA
-#define SEND_ANGLE
-//#define SEND_COOR
-
 //calculate time of every circulation
 #define __TIMER_START__ timer.start()
 #define __TIMER_PRINT__ do { timer.end(); std::cout << (int)(timer.getTime() * 1000) << std::endl; } while (0)
@@ -99,24 +95,26 @@ int main(int argc, char *argv[])
 		//get usdful image
 		cam0.getImage();
 
-#ifdef SEND_AREA  
-
-		//sort to three area and send golf ball num in every area
-		cam0.areaSort(cam0.getNoBGBallImage());
-
-#elif defined SEND_ANGLE
-
-		//find the angle with most golf ball
-		cam0.findOptimalAngle();
-
-#elif defined SEND_COOR  
-
-		//send out distance and angle of every golf ball
-		cam0.calcPosition();
-
-#else
-
-#endif
+		if (digitalRead(1) == LOW && digitalRead(2) == LOW)
+		{
+			//sort to three area and send golf ball num in every area
+			cam0.areaSort(cam0.getNoBGBallImage());
+		}
+		else if (digitalRead(1) == LOW && digitalRead(2) == HIGH)
+		{
+			//find the angle with most golf ball
+			cam0.findOptimalAngle();
+		}
+		else if (digitalRead(1) == HIGH && digitalRead(2) == LOW)
+		{
+			//send out distance and angle of every golf ball
+			cam0.getNearestBall();
+		}
+		else
+		{
+			//send out distance and angle of every golf ball
+			cam0.calcPosition();
+		}
 
 		//show all images that have been used
 		cam0.showImage();
