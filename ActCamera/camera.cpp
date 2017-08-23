@@ -476,12 +476,14 @@ void act::Camera::getNearestBall(void)
 
 	//send data from serial
 	serialPutchar(act::setFdSerial(), 0xD8);
+	if (CCCounter > 0)
+	{
+		serialPutchar(act::setFdSerial(), (unsigned char)CCMDAngle);
+		std::cout << " ang " << (unsigned int)CCMDAngle;
 
-	serialPutchar(act::setFdSerial(), (unsigned char)CCMDAngle);
-	std::cout << " ang " << (unsigned int)CCMDAngle;
-	serialPutchar(act::setFdSerial(), (unsigned char)CCMinDist);
-	std::cout << "  min dist " << (unsigned int)CCMinDist;
-
+		serialPutchar(act::setFdSerial(), (unsigned char)CCMinDist);
+		std::cout << "  min dist " << (unsigned int)CCMinDist;	
+	}
 	std::cout << std::endl;
 }
 
