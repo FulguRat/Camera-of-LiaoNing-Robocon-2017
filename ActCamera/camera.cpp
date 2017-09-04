@@ -448,8 +448,10 @@ void act::Camera::getNearestBall(void)
 	while (!CCSize.empty() || !CCCore.empty())
 	{
 		CCAng.push_back((unsigned char)(((160 - (int)CCCore.back().x) * 25 / 160) + ANG_ERR));
-		CCDist.push_back((unsigned char)(-0.00022f * pow((float)CCCore.back().y, 3) + 0.06142f * pow((float)CCCore.back().y, 2) -
-			6.18f * (float)CCCore.back().y + 281.7f));
+		CCDist.push_back((unsigned char)(129.3f * pow(E, -0.05817f  * (double)CCCore.back().y)) +
+			113.6f * pow(E, -0.009029f * (double)CCCore.back().y));
+		//CCDist.push_back((unsigned char)(-0.00022f * pow((float)CCCore.back().y, 3) + 0.06142f * pow((float)CCCore.back().y, 2) -
+		//	6.18f * (float)CCCore.back().y + 281.7f));
 
 		cv::circle(ballPositionImage, CCCore.back(), 5, 255, 1);
 
@@ -494,8 +496,8 @@ void act::Camera::calcPosition(void)
 	while (!CCSize.empty() || !CCCore.empty())
 	{
 		CCAng.push_back((unsigned char)(((160 - (int)CCCore.back().x) * 25 / 160) + ANG_ERR));
-		CCDist.push_back((unsigned char)(-0.00022f * pow((float)CCCore.back().y, 3) + 0.06142f * pow((float)CCCore.back().y, 2) - 
-			6.18f * (float)CCCore.back().y + 281.7f));
+		CCDist.push_back((unsigned char)(129.3f * pow(E, -0.05817f  * (double)CCCore.back().y)) + 
+										 113.6f * pow(E, -0.009029f * (double)CCCore.back().y));
 
 		//judge the number of golf ball in this connected component
 		if ((float)CCSize.back() >= 0.5f * STD_PIXS && (float)CCSize.back() <= 1.4f * STD_PIXS)
@@ -524,7 +526,7 @@ void act::Camera::calcPosition(void)
 	{
 		for (unsigned int j = 0; j < CCBNum.back(); j++)
 		{
-			if (CCDist.back() < 190 && CCAng.back() >= -25 && CCAng.back() <= 25)
+			if (CCDist.back() < 190 && (CCAng.back() >= 231 || CCAng.back() <= 25))
 			{
 				serialPutchar(act::setFdSerial(), (unsigned char)CCAng.back());
 				std::cout << " ang " << (unsigned int)CCAng.back();

@@ -8,10 +8,11 @@
 #include <errno.h>
 #include <math.h>
 
+#define E 2.718281828f
 #define ROWS_CUTS 80
 #define ANG_ERR 1
-#define STD_PIXS (0.067f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
-                  8.28f * ((float)CCCore.back().y + ROWS_CUTS) + 273.22f)
+#define STD_PIXS (0.05521f * ((float)CCCore.back().y + ROWS_CUTS) * ((float)CCCore.back().y + ROWS_CUTS) - \
+                  4.805f * ((float)CCCore.back().y + ROWS_CUTS) + 43.07f)
 
 namespace act
 {
