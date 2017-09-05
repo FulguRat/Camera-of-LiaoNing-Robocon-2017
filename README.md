@@ -16,6 +16,5 @@ Golf ball recognition in LiaoNing robot contest 2017
 9. raspberry DMA/FPU
 10. 注意可能看到储藏室里的球和网兜里的球
 11. 两条线卡球的最大距离范围（一条卡上边缘，一条卡球心）
-12. 尝试更换OpenCV3
-13. 数总共收进了多少个球
+
 
