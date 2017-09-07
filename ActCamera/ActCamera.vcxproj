@@ -33,12 +33,12 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <IncludePath>/usr/local/include;C:\Users\STpiamcee42\Desktop\Opencv\install\include;$(IncludePath)</IncludePath>
+    <IncludePath>/usr/local/include;E:\ACTION2016\opencv\build\include;$(IncludePath)</IncludePath>
     <LibraryPath>/usr/local/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <IncludePath>C:\Users\STpiamcee42\Desktop\Opencv\install\include\opencv2;C:\Users\STpiamcee42\Desktop\Opencv\install\include;/usr/local/include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\STpiamcee42\Desktop\Opencv\install\lib;/usr/local/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\ACTION2016\opencv\build\include\opencv2;/usr/local/include;E:\ACTION2016\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\ACTION2016\opencv\build\x86\vc15\lib;/usr/local/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
