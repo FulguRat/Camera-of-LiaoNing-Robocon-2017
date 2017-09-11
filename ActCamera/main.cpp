@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 		}
 		else if (digitalRead(1) == HIGH && digitalRead(2) == LOW)
 		{
-			//send out distance and angle of every golf ball
+			//send out distance and angle of the nearest golf ball
 			cam0.getNearestBall();
 		}
 		else
