@@ -246,28 +246,15 @@ void act::Camera::getImage()
 			{
 				*noBGBallImage.ptr<uchar>(i, j) = 0;
 				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
+				{
+					for (auto k = fieldCHImage.cols; k > 0; k--)
+					{
+						*noBGBallImage.ptr<uchar>(i, k) = 0;
+						if (*fieldCHImage.ptr<uchar>(i, k) == 255) { break; }
+					}
+
 					break;
-			}
-		for (auto i = 0; i < fieldCHImage.rows; i++)
-			for (auto j = fieldCHImage.cols - 1; j >= 0; j--)
-			{
-				*noBGBallImage.ptr<uchar>(i, j) = 0;
-				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-					break;
-			}
-		for (auto j = 0; j < fieldCHImage.cols; j++)
-			for (auto i = 0; i < fieldCHImage.rows; i++)
-			{
-				*noBGBallImage.ptr<uchar>(i, j) = 0;
-				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-					break;
-			}
-		for (auto j = 0; j < fieldCHImage.cols; j++)
-			for (auto i = fieldCHImage.rows - 1; i >= 0; i--)
-			{
-				*noBGBallImage.ptr<uchar>(i, j) = 0;
-				if (*fieldCHImage.ptr<uchar>(i, j) == 255)
-					break;
+				}
 			}
 
 		////image processing of allBallImage

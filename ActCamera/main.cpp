@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
     act::Timestamp timer;
     while (1)
     {
-        //__TIMER_PRINT__;
-        //__TIMER_START__;
+        __TIMER_PRINT__;
+        __TIMER_START__;
 
 		////test part
 		//cam0.setExposureValue(false, g_testValue);
