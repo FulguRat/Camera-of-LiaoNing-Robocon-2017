@@ -132,6 +132,9 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 
 void act::Camera::autoSet()
 {
+#define MINBGR_MIN 204
+#define MINBGR_MAX 206
+
 	int averageBGR[3] = { 0 };
 	int refPointCounter = 0;
 	int minBGR = 0;
@@ -141,17 +144,20 @@ void act::Camera::autoSet()
 	do
 	{
 		//adjust exposure time
-		if (minBGR < 150 && initCounter == 0) { expoTime += 5; }
-		else if (minBGR >= 150 && minBGR < 204 && initCounter == 0) { expoTime++; initCounter = 3; }
+		if ((minBGR < MINBGR_MAX || minBGR > MINBGR_MIN) && initCounter == 0)
+		{
+			if (minBGR < MINBGR_MIN - 30) { expoTime += 5; }
+			else if (minBGR >= MINBGR_MIN - 30 && minBGR < MINBGR_MIN) { expoTime++; initCounter = 3; }
 
-		else if (minBGR > 230 && initCounter == 0) { expoTime -= 5; }
-		else if (minBGR <= 230 && minBGR > 208 && initCounter == 0) { expoTime--; initCounter = 3; }
+			else if (minBGR > MINBGR_MAX + 30) { expoTime -= 5; }
+			else if (minBGR <= MINBGR_MAX + 30 && minBGR > MINBGR_MAX) { expoTime--; initCounter = 3; }
 
+			else {}
+		}
 		else if (initCounter > 0) { initCounter--; }
 		else { break; }
 
 		setExposureValue(false, expoTime);
-		//cv::waitKey(100);
 
 		averageBGR[0] = 0;
 		averageBGR[1] = 0;
@@ -191,7 +197,7 @@ void act::Camera::autoSet()
 		{
 			break;
 		}
-	} while ((minBGR < 208 || minBGR > 204) || initCounter > 0);
+	} while ((minBGR < MINBGR_MIN || minBGR > MINBGR_MAX) || initCounter > 0);
 
 	std::cout << "Auto set exposure time done" << std::endl;
 

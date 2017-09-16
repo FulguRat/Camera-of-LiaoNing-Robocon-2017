@@ -40,6 +40,7 @@ namespace act
             originalImage = temp.clone();
         }
 
+		//auto set exposure time and white balance
 		void autoSet();
 
 		void getImage();
