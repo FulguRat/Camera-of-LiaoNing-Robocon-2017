@@ -40,6 +40,8 @@ namespace act
             originalImage = temp.clone();
         }
 
+		void autoSet();
+
 		void getImage();
 
         void setROIRect(const cv::Rect &r)
@@ -57,8 +59,6 @@ namespace act
 		cv::Mat getNoBGImage() const { return noBackgroundImage; }
 		cv::Mat getFieldCHImage() const { return fieldCHImage; }
         cv::Mat getNoBGBallImage() const { return noBGBallImage; }
-
-		//void showTrackbar();
 
 		void showImage() const
 		{
@@ -79,15 +79,14 @@ namespace act
 
 		//scheme 1:sort ball to three area and send out area number with most balls
 		void areaSort(cv::Mat ballImage);
-
 		//scheme 2:send out angle with most of balls can be get
 		void findOptimalAngle(void);
-
 		//scheme 3:send out angle and distance of nearest ball
 		void getNearestBall(void);
-
 		//scheme 4:send out angle and distance of every ball
 		void calcPosition(void);
+
+		void testThreshold();
 
 		struct min_max
 		{
@@ -105,22 +104,6 @@ namespace act
 
     private:
         cv::VideoCapture videoCapture;
-		
-		////trackbar class and its vector
-		//struct trackbar
-		//{
-		//	trackbar() {}
-		//	trackbar(char* _name, int _maxValue) : name(_name), maxValue(_maxValue) {}
-		//	char* name;
-		//	int maxValue = 0;
-		//	int outputValue = 0;
-		//	int slider = 0;
-		//	void callback(int, void*)
-		//	{
-		//		outputValue = slider;
-		//	}
-		//};
-		//trackbar* trackbarSet;
 
 		cv::Mat originalImage;
         cv::Mat basicImage;
@@ -154,6 +137,10 @@ namespace act
 		std::vector<unsigned int> CCBNum;
 		unsigned char CCMinDist = 200;
 		unsigned char CCMDAngle = 0;
+
+		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
+		//int brightness = 0;
+		int expoTime = 0;
 
         int usbNumber = 0;
     };

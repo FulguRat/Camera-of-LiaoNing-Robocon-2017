@@ -16,14 +16,14 @@ const int32_t EXPOSURE_TIME = 300;  //time of exposure
 
 const int32_t CAMERA_NUMBER = 1; //camera number
 
-////trackbar globe variable and callback function
-//const int g_trackbarMax = 400;
-//int g_trackbarSlider;
-//int g_testValue = 0;
-//void trackbarCallback(int, void*)
-//{
-//	g_testValue = g_trackbarSlider;
-//}
+//////trackbar globe variable and callback function
+////const int g_trackbarMax = 400;
+////int g_trackbarSlider;
+////int g_testValue = 0;
+////void trackbarCallback(int, void*)
+////{
+////	g_testValue = g_trackbarSlider;
+////}
 
 int main(int argc, char *argv[])
 {
@@ -50,9 +50,10 @@ int main(int argc, char *argv[])
 	}
 
 	//initialization cam0
-	cam0.setExposureValue(true);
+	//cam0.setExposureValue(true);
 	cam0.setAutoWhiteBalance(true);
     cam0.setROIRect(cv::Rect(0, ROWS_CUTS, cam0.cols, cam0.rows - ROWS_CUTS));
+	cam0.autoSet();
 
 	//initialization wiringPi and serial
 	wiringPiSetup();
@@ -75,10 +76,22 @@ int main(int argc, char *argv[])
 	pinMode(1, INPUT);
 	pinMode(2, INPUT);
 
-	//g_trackbarSlider = 0;
+	////g_trackbarSlider = 0;
+	////cv::namedWindow("TKB");
+	////cv::createTrackbar("trackBar", "TKB", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
+	////trackbarCallback(g_trackbarSlider, 0);
+
 	//cv::namedWindow("TKB");
-	//cv::createTrackbar("trackBar", "ORG", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
-	//trackbarCallback(g_trackbarSlider, 0);
+	//act::trackbarSet.push_back(act::trackbar("maxH", 255));
+	//act::trackbarSet.push_back(act::trackbar("minH", 255));
+	//act::trackbarSet.push_back(act::trackbar("maxS", 255));
+	//act::trackbarSet.push_back(act::trackbar("minS", 255));
+	//act::trackbarSet.push_back(act::trackbar("maxV", 255));
+	//act::trackbarSet.push_back(act::trackbar("minV", 255));
+	//for (size_t i = 0; i < act::trackbarSet.size(); i++)
+	//{
+	//	cv::createTrackbar(act::trackbarSet.at(i).name, "TKB", &act::slider, act::trackbarSet.at(i).maxValue, act::callback);
+	//}
 
     act::Timestamp timer;
     while (1)
@@ -86,8 +99,8 @@ int main(int argc, char *argv[])
         __TIMER_PRINT__;
         __TIMER_START__;
 
-		////test part
-		//cam0.setExposureValue(false, g_testValue);
+		//////test part
+		////cam0.setExposureValue(false, g_testValue);
 
 		//update frame
         cam0.update();

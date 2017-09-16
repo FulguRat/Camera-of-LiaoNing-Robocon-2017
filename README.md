@@ -10,4 +10,5 @@ Golf ball recognition in LiaoNing robot contest 2017
 3. 两条线卡球的最大距离范围（一条卡上边缘，一条卡球心）
 4. 开机时间过长报错VIDIOC_DQBUF no such device（上车后供电暂未出现此问题）
 5. raspberry DMA/FPU
+6. 修改对于向量的使用，使用at调用向量元素
 

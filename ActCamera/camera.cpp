@@ -18,28 +18,6 @@ act::Camera::Camera(char _id) : VCConfig(_id)
 	}
 }
 
-//void act::Camera::showTrackbar()
-//{
-//	trackbarSet = new trackbar[6];
-//
-//	trackbarSet[0] = trackbar("minB", 255);
-//	trackbarSet[1] = trackbar("maxB", 255);
-//	trackbarSet[2] = trackbar("minG", 255);
-//	trackbarSet[3] = trackbar("maxG", 255);
-//	trackbarSet[4] = trackbar("minR", 255);
-//	trackbarSet[5] = trackbar("maxR", 255);
-//	
-//	cv::namedWindow("TKB");
-//	
-//	for (auto i = 0; i < 6; i++)
-//	{
-//		cv::createTrackbar(trackbarSet[i].name, "TKB", &trackbarSet[i].slider, trackbarSet[i].maxValue, trackbarSet[i].callback);
-//		trackbarSet[i].callback(trackbarSet[i].slider, 0);
-//	}
-//
-//	delete[] trackbarSet;
-//}
-
 void act::Camera::findConnectedComponents(cv::Mat &binary)
 {
 	auto bin = binary.clone();
@@ -150,6 +128,80 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 	//	CCCore.pop_back();
 	//}
 	//std::cout << std::endl;
+}
+
+void act::Camera::autoSet()
+{
+	int averageBGR[3] = { 0 };
+	int refPointCounter = 0;
+	int minBGR = 0;
+	int initCounter = 5;
+
+	//set brightness
+	do
+	{
+		//adjust exposure time
+		if (minBGR < 150 && initCounter == 0) { expoTime += 5; }
+		else if (minBGR >= 150 && minBGR < 204 && initCounter == 0) { expoTime++; initCounter = 3; }
+
+		else if (minBGR > 230 && initCounter == 0) { expoTime -= 5; }
+		else if (minBGR <= 230 && minBGR > 208 && initCounter == 0) { expoTime--; initCounter = 3; }
+
+		else if (initCounter > 0) { initCounter--; }
+		else { break; }
+
+		setExposureValue(false, expoTime);
+		//cv::waitKey(100);
+
+		averageBGR[0] = 0;
+		averageBGR[1] = 0;
+		averageBGR[2] = 0;
+		refPointCounter = 0;
+
+		//update original image
+		update();
+		imshow("ORIGINAL", getOriginalImageROI());
+		//get RGB value of white area
+		for (int i = 140; i < originalImage(ROIRect).rows; i++)
+		{
+			for (int j = 300; j < originalImage(ROIRect).cols; j++)
+			{
+				auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
+
+				averageBGR[0] += pix[0];
+				averageBGR[1] += pix[1];
+				averageBGR[2] += pix[2];
+
+				refPointCounter++;
+			}
+		}
+		averageBGR[0] /= refPointCounter;
+		averageBGR[1] /= refPointCounter;
+		averageBGR[2] /= refPointCounter;
+
+		//find the minimal value of BGR
+		minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
+		minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
+
+		std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
+			<< expoTime << "   " << minBGR << std::endl;
+
+		//if push down Esc, kill the progress
+		if (cv::waitKey(10) == 27)
+		{
+			break;
+		}
+	} while ((minBGR < 208 || minBGR > 204) || initCounter > 0);
+
+	std::cout << "Auto set exposure time done" << std::endl;
+
+	////set white balance
+	//gainBGR[0] = (float)minBGR / (float)averageBGR[0];
+	//gainBGR[1] = (float)minBGR / (float)averageBGR[1];
+	//gainBGR[2] = (float)minBGR / (float)averageBGR[2];
+
+	//std::cout << gainBGR[0] << "   " << gainBGR[1] << "   " << gainBGR[2] << std::endl;
+	//std::cout << "Auto set white balance done" << std::endl;
 }
 
 void act::Camera::getImage()
@@ -528,6 +580,19 @@ void act::Camera::calcPosition(void)
 	}
 	serialPutchar(act::setFdSerial(), 0xC5);
 	std::cout << std::endl;
+}
+
+//test threshold of white/black and green
+void act::Camera::testThreshold()
+{
+	update();
+
+	//get basic image for later handle
+	basicImage = originalImage(ROIRect).clone();
+	cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
+
+	allBallImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+
 }
 
 //Fd Get_Set
