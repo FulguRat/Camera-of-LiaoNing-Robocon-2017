@@ -49,13 +49,13 @@ int main(int argc, char *argv[])
 		std::cout << "Camera init Done" << std::endl;
 	}
 
-	//initialization cam0
+	//initialize cam0
 	//cam0.setExposureValue(true);
 	cam0.setAutoWhiteBalance(true);
     cam0.setROIRect(cv::Rect(0, ROWS_CUTS, cam0.cols, cam0.rows - ROWS_CUTS));
 	cam0.autoSet();
 
-	//initialization wiringPi and serial
+	//initialize wiringPi and serial
 	wiringPiSetup();
 	int fdSerial;
 	if ((fdSerial = serialOpen("/dev/ttyAMA0", 115200)) < 0)
@@ -68,13 +68,31 @@ int main(int argc, char *argv[])
 		printf("Serial init done and fdSerial = %d\n", fdSerial);
 	}
 
-	//set GPIO1 input mode
+	//use GPIO0 to shutdown the raspberryPi
 	pinMode(0, INPUT);
 	int shutdownCounter = 0;
 	int shutdownFlag = digitalRead(0);
 
+	//use GPIO1 AND GPIO2 to control the output
 	pinMode(1, INPUT);
 	pinMode(2, INPUT);
+
+	//initialize temperature detection
+#define TEMPE_PATH "/sys/class/thermal/thermal_zone0/temp"
+#define MAX_SIZE 32
+
+	int tempeCounter = 0;
+	int fdTempe;
+	char bufTempe[MAX_SIZE];
+	if ((fdTempe = open(TEMPE_PATH, O_RDONLY)) < 0)
+	{
+		fprintf(stderr, "failed to open temperature path\n");
+	}
+	else
+	{
+		printf("ready for detecting temperature\n");
+		close(fdTempe);
+	}
 
 	////g_trackbarSlider = 0;
 	////cv::namedWindow("TKB");
@@ -131,6 +149,34 @@ int main(int argc, char *argv[])
 
 		//show all images that have been used
 		cam0.showImage();
+
+		//detecting temperature. If overheating, send out 0XC4
+		if (tempeCounter <= 0)
+		{
+			if ((fdTempe = open(TEMPE_PATH, O_RDONLY)) < 0)
+			{
+				std::cout << "open path failed\n" << std::endl;
+			}
+			else
+			{
+				if (read(fdTempe, bufTempe, MAX_SIZE) < 0)
+				{
+					std::cout << "read temperature failed\n" << std::endl;
+				}
+				else
+				{
+					std::cout << "Temperature: " << atoi(bufTempe) / 1000.0f << std::endl;
+					memset(bufTempe, NULL, MAX_SIZE * sizeof(char));
+					tempeCounter = 0;
+				}
+				close(fdTempe);
+			}
+		}
+		else
+		{
+			tempeCounter--;
+		}
+
 
 		//if GPIO1 change its voltage, shutdown the raspberryPi
 		if (digitalRead(0) == shutdownFlag)
