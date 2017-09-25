@@ -6,6 +6,10 @@
 #include "videoconfig.h"
 #include "camera.h"
 
+#define MESURE_TIME
+//#define MESURE_TEMPE
+//#define SHUTDOWN_KEY
+
 //calculate time of every circulation
 #define __TIMER_START__ timer.start()
 #define __TIMER_PRINT__ do { timer.end(); std::cout << (int)(timer.getTime() * 1000) << std::endl; } while (0)
@@ -68,6 +72,8 @@ int main(int argc, char *argv[])
 		printf("Serial init done and fdSerial = %d\n", fdSerial);
 	}
 
+#ifdef SHUTDOWN_KEY
+
 	//use GPIO0 to shutdown the raspberryPi
 	pinMode(0, INPUT);
 	int shutdownCounter = 0;
@@ -76,6 +82,10 @@ int main(int argc, char *argv[])
 	//use GPIO1 AND GPIO2 to control the output
 	pinMode(1, INPUT);
 	pinMode(2, INPUT);
+
+#endif
+
+#ifdef MESURE_TEMPE
 
 	//initialize temperature detection
 #define TEMPE_PATH "/sys/class/thermal/thermal_zone0/temp"
@@ -93,6 +103,8 @@ int main(int argc, char *argv[])
 		printf("ready for detecting temperature\n");
 		close(fdTempe);
 	}
+
+#endif
 
 	////g_trackbarSlider = 0;
 	////cv::namedWindow("TKB");
@@ -114,8 +126,12 @@ int main(int argc, char *argv[])
     act::Timestamp timer;
     while (1)
     {
-        __TIMER_PRINT__;
+#ifdef MESURE_TIME
+
+		__TIMER_PRINT__;
         __TIMER_START__;
+
+#endif
 
 		//////test part
 		////cam0.setExposureValue(false, g_testValue);
@@ -150,6 +166,8 @@ int main(int argc, char *argv[])
 		//show all images that have been used
 		cam0.showImage();
 
+#ifdef MESURE_TEMPE
+
 		//detecting temperature. If overheating, send out 0XC4
 		if (tempeCounter <= 0)
 		{
@@ -177,6 +195,9 @@ int main(int argc, char *argv[])
 			tempeCounter--;
 		}
 
+#endif
+
+#ifdef SHUTDOWN_KEY
 
 		//if GPIO1 change its voltage, shutdown the raspberryPi
 		if (digitalRead(0) == shutdownFlag)
@@ -200,6 +221,8 @@ int main(int argc, char *argv[])
 			}
 			shutdownCounter = 0;
 		}
+
+#endif
 
 		//if push down Esc, kill the progress
         if (cv::waitKey(10) == 27)

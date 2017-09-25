@@ -37,8 +37,8 @@
     <LibraryPath>/usr/local/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <IncludePath>C:\Users\STpiamcee42\Desktop\Opencv\install\include\opencv2;C:\Users\STpiamcee42\Desktop\Opencv\install\include;/usr/local/include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\STpiamcee42\Desktop\Opencv\install\lib;/usr/local/lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Code\OpencvSrc\install\include\opencv2;C:\Code\OpencvSrc\install\include;/usr/local/include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Code\OpencvSrc\install\lib;/usr/local/lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
