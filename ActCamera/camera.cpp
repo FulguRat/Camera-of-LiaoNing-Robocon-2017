@@ -132,25 +132,31 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 
 void act::Camera::autoSet()
 {
-#define MINBGR_MIN 204
-#define MINBGR_MAX 206
+#define MAXBGR_MIN 174
+#define MAXBGR_MAX 180
+
+#define REFERAREA_MIN_X 106
+#define REFERAREA_MIN_Y 80
+#define REFERAREA_MAX_X 214
+#define REFERAREA_MAX_Y 120
 
 	int averageBGR[3] = { 0 };
 	int refPointCounter = 0;
-	int minBGR = 0;
+	int maxBGR = 0;
 	int initCounter = 5;
+	expoTime = 128;
 
 	//set brightness
 	do
 	{
 		//adjust exposure time
-		if ((minBGR < MINBGR_MAX || minBGR > MINBGR_MIN) && initCounter == 0)
+		if ((maxBGR < MAXBGR_MAX || maxBGR > MAXBGR_MIN) && initCounter == 0)
 		{
-			if (minBGR < MINBGR_MIN - 30) { expoTime += 5; }
-			else if (minBGR >= MINBGR_MIN - 30 && minBGR < MINBGR_MIN) { expoTime++; initCounter = 3; }
+			if (maxBGR < MAXBGR_MIN - 30) { expoTime += 2; initCounter = 4; }
+			else if (maxBGR >= MAXBGR_MIN - 30 && maxBGR < MAXBGR_MIN) { expoTime++; initCounter = 4; }
 
-			else if (minBGR > MINBGR_MAX + 30) { expoTime -= 5; }
-			else if (minBGR <= MINBGR_MAX + 30 && minBGR > MINBGR_MAX) { expoTime--; initCounter = 3; }
+			else if (maxBGR > MAXBGR_MAX + 30) { expoTime -= 2; initCounter = 4; }
+			else if (maxBGR <= MAXBGR_MAX + 30 && maxBGR > MAXBGR_MAX) { expoTime--; initCounter = 4; }
 
 			else {}
 		}
@@ -168,9 +174,9 @@ void act::Camera::autoSet()
 		update();
 		imshow("ORIGINAL", getOriginalImageROI());
 		//get RGB value of white area
-		for (int i = 140; i < originalImage(ROIRect).rows; i++)
+		for (int i = REFERAREA_MIN_Y; i < REFERAREA_MAX_Y; i++)
 		{
-			for (int j = 300; j < originalImage(ROIRect).cols; j++)
+			for (int j = REFERAREA_MIN_X; j < REFERAREA_MAX_X; j++)
 			{
 				auto pix = originalImage(ROIRect).ptr<cv::Vec3b>(i)[j];
 
@@ -186,25 +192,25 @@ void act::Camera::autoSet()
 		averageBGR[2] /= refPointCounter;
 
 		//find the minimal value of BGR
-		minBGR = averageBGR[0] < averageBGR[1] ? averageBGR[0] : averageBGR[1];
-		minBGR = minBGR < averageBGR[2] ? minBGR : averageBGR[2];
+		maxBGR = averageBGR[0] > averageBGR[1] ? averageBGR[0] : averageBGR[1];
+		maxBGR = maxBGR > averageBGR[2] ? maxBGR : averageBGR[2];
 
 		std::cout << averageBGR[0] << "   " << averageBGR[1] << "   " << averageBGR[2] << "   "  \
-			<< expoTime << "   " << minBGR << std::endl;
+			<< expoTime << "   " << maxBGR << std::endl;
 
 		//if push down Esc, kill the progress
 		if (cv::waitKey(10) == 27)
 		{
 			break;
 		}
-	} while ((minBGR < MINBGR_MIN || minBGR > MINBGR_MAX) || initCounter > 0);
+	} while ((maxBGR < MAXBGR_MIN || maxBGR > MAXBGR_MAX) || initCounter > 0);
 
 	std::cout << "Auto set exposure time done" << std::endl;
 
 	////set white balance
-	//gainBGR[0] = (float)minBGR / (float)averageBGR[0];
-	//gainBGR[1] = (float)minBGR / (float)averageBGR[1];
-	//gainBGR[2] = (float)minBGR / (float)averageBGR[2];
+	//gainBGR[0] = (float)maxBGR / (float)averageBGR[0];
+	//gainBGR[1] = (float)maxBGR / (float)averageBGR[1];
+	//gainBGR[2] = (float)maxBGR / (float)averageBGR[2];
 
 	//std::cout << gainBGR[0] << "   " << gainBGR[1] << "   " << gainBGR[2] << std::endl;
 	//std::cout << "Auto set white balance done" << std::endl;

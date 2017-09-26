@@ -16,135 +16,137 @@
 
 namespace act
 {
-	//fd Get_Set
-	void getFdSerial(int fdS);
-	int setFdSerial(void);
 
-	//=======================================================================================
-	//                            definition of Camera class                                 
-	//=======================================================================================
-	class Camera : public VCConfig
+//fd Get_Set
+void getFdSerial(int fdS);
+int setFdSerial(void);
+
+//=======================================================================================
+//                            definition of Camera class                                 
+//=======================================================================================
+class Camera : public VCConfig
+{
+public:
+    explicit Camera(char _id);
+    Camera(const Camera &) = delete;
+	Camera &operator = (const Camera &) = delete;
+    virtual ~Camera() {}
+
+    bool is_open() { return fd != -1; }
+
+    void update()
     {
-    public:
-        explicit Camera(char _id);
-        Camera(const Camera &) = delete;
-		Camera &operator = (const Camera &) = delete;
-        virtual ~Camera() {}
+        cv::Mat temp;
+        videoCapture >> temp;
+        originalImage = temp.clone();
+    }
 
-        bool is_open() { return fd != -1; }
+	//auto set exposure time and white balance
+	void autoSet();
 
-        void update()
-        {
-            cv::Mat temp;
-            videoCapture >> temp;
-            originalImage = temp.clone();
-        }
+	void getImage();
 
-		//auto set exposure time and white balance
-		void autoSet();
+    void setROIRect(const cv::Rect &r)
+    {
+        ROIRect = r;
+        ROICols = r.width;
+        ROIRows = r.height;
+    }
 
-		void getImage();
+	cv::Mat getoriginalImage() const { return originalImage; }
+    cv::Mat getOriginalImageROI() const { return originalImage(ROIRect); }
+    cv::Mat getBasicImage() const { return basicImage; }
+	cv::Mat getAllBallImage() const { return allBallImage; }
+	cv::Mat getAllGreenImage() const { return allGreenImage; }
+	cv::Mat getNoBGImage() const { return noBackgroundImage; }
+	cv::Mat getFieldCHImage() const { return fieldCHImage; }
+    cv::Mat getNoBGBallImage() const { return noBGBallImage; }
 
-        void setROIRect(const cv::Rect &r)
-        {
-            ROIRect = r;
-            ROICols = r.width;
-            ROIRows = r.height;
-        }
+	void showImage() const
+	{
+		cv::imshow("ORG", originalImage);
+		cv::imshow("ORGROI", originalImage(ROIRect));
+		cv::imshow("BSC", basicImage);
+		cv::imshow("AB", allBallImage);
+		cv::imshow("AG", allGreenImage);
+		cv::imshow("FC", fieldCtsImage);
+		cv::imshow("FCH", fieldCHImage);
+		cv::imshow("NoBGB", noBGBallImage);
+		cv::imshow("BP", ballPositionImage);
+	}
 
-		cv::Mat getoriginalImage() const { return originalImage; }
-        cv::Mat getOriginalImageROI() const { return originalImage(ROIRect); }
-        cv::Mat getBasicImage() const { return basicImage; }
-		cv::Mat getAllBallImage() const { return allBallImage; }
-		cv::Mat getAllGreenImage() const { return allGreenImage; }
-		cv::Mat getNoBGImage() const { return noBackgroundImage; }
-		cv::Mat getFieldCHImage() const { return fieldCHImage; }
-        cv::Mat getNoBGBallImage() const { return noBGBallImage; }
+    void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
 
-		void showImage() const
-		{
-			cv::imshow("ORG", originalImage);
-			cv::imshow("ORGROI", originalImage(ROIRect));
-			cv::imshow("BSC", basicImage);
-			cv::imshow("AB", allBallImage);
-			cv::imshow("AG", allGreenImage);
-			cv::imshow("FC", fieldCtsImage);
-			cv::imshow("FCH", fieldCHImage);
-			cv::imshow("NoBGB", noBGBallImage);
-			cv::imshow("BP", ballPositionImage);
-		}
+    void findConnectedComponents(cv::Mat &binary);
 
-        void getROIImage(cv::Mat &ri) const { ri = ROIImage; }
+	//scheme 1:sort ball to three area and send out area number with most balls
+	void areaSort(cv::Mat ballImage);
+	//scheme 2:send out angle with most of balls can be get
+	void findOptimalAngle(void);
+	//scheme 3:send out angle and distance of nearest ball
+	void getNearestBall(void);
+	//scheme 4:send out angle and distance of every ball
+	void calcPosition(void);
 
-        void findConnectedComponents(cv::Mat &binary);
+	void testThreshold();
 
-		//scheme 1:sort ball to three area and send out area number with most balls
-		void areaSort(cv::Mat ballImage);
-		//scheme 2:send out angle with most of balls can be get
-		void findOptimalAngle(void);
-		//scheme 3:send out angle and distance of nearest ball
-		void getNearestBall(void);
-		//scheme 4:send out angle and distance of every ball
-		void calcPosition(void);
+	struct min_max
+	{
+		min_max() {}
+		min_max(int _min, int _max) : min(_min), max(_max) {}
+		int min = 0;
+		int max = 0;
+	};
 
-		void testThreshold();
+    int cols = 0;
+    int rows = 0;
 
-		struct min_max
-		{
-			min_max() {}
-			min_max(int _min, int _max) : min(_min), max(_max) {}
-			int min = 0;
-			int max = 0;
-		};
+    int ROICols = 0;
+    int ROIRows = 0;
 
-        int cols = 0;
-        int rows = 0;
+private:
+    cv::VideoCapture videoCapture;
 
-        int ROICols = 0;
-        int ROIRows = 0;
+	cv::Mat originalImage;
+    cv::Mat basicImage;
+	cv::Mat allBallImage;
+	cv::Mat allGreenImage;
+    cv::Mat noBackgroundImage;
+	cv::Mat fieldCtsImage;
+    cv::Mat fieldCHImage;
+    cv::Mat noBGBallImage;
+	cv::Mat ballPositionImage;
 
-    private:
-        cv::VideoCapture videoCapture;
+    cv::Mat ROIImage;
+    cv::Rect ROIRect;
 
-		cv::Mat originalImage;
-        cv::Mat basicImage;
-		cv::Mat allBallImage;
-		cv::Mat allGreenImage;
-        cv::Mat noBackgroundImage;
-		cv::Mat fieldCtsImage;
-        cv::Mat fieldCHImage;
-        cv::Mat noBGBallImage;
-		cv::Mat ballPositionImage;
+	std::vector<std::vector<cv::Point>> fieldContours;
 
-        cv::Mat ROIImage;
-        cv::Rect ROIRect;
+	std::vector<int> CCSize;
+	std::vector<cv::Point> CCCore;
 
-		std::vector<std::vector<cv::Point>> fieldContours;
+	int areaLNum = 0;
+	int areaMNum = 0;
+	int areaRNum = 0;
+	int targetArea = 0;
 
-		std::vector<int> CCSize;
-		std::vector<cv::Point> CCCore;
+	unsigned int ballNumByX[320] = { 0 };
+	int optimalAngle = 0;
 
-		int areaLNum = 0;
-		int areaMNum = 0;
-		int areaRNum = 0;
-		int targetArea = 0;
+	unsigned int CCCounter = 0;
+	std::vector<unsigned char> CCAng;
+	std::vector<unsigned char> CCDist;
+	std::vector<unsigned int> CCBNum;
+	unsigned char CCMinDist = 200;
+	unsigned char CCMDAngle = 0;
 
-		unsigned int ballNumByX[320] = { 0 };
-		int optimalAngle = 0;
+	float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
+	//int brightness = 0;
+	int expoTime = 0;
 
-		unsigned int CCCounter = 0;
-		std::vector<unsigned char> CCAng;
-		std::vector<unsigned char> CCDist;
-		std::vector<unsigned int> CCBNum;
-		unsigned char CCMinDist = 200;
-		unsigned char CCMDAngle = 0;
+    int usbNumber = 0;
+};
 
-		float gainBGR[3] = { 1.0f, 1.0f, 1.0f };
-		//int brightness = 0;
-		int expoTime = 0;
-
-        int usbNumber = 0;
-    };
 };
 
 #endif // !__CAMERA_H

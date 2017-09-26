@@ -6,7 +6,7 @@
 #include "videoconfig.h"
 #include "camera.h"
 
-#define MESURE_TIME
+//#define MESURE_TIME
 //#define MESURE_TEMPE
 //#define SHUTDOWN_KEY
 

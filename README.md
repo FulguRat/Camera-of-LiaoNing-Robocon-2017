@@ -6,6 +6,8 @@ Golf ball recognition in LiaoNing robot contest 2017
 ### 存在问题
 
 1. 尝试canny+颜色分割方式检测球（去除反光影响）
+   * 漫水填充 `floodFill()`
+   * `copyTo()` & `Mask`
 2. 重新调参数（有空的话整好滑动条调参）
 3. 查形态学判断球的方法
 4. 两条线卡球的最大距离范围（一条卡上边缘，一条卡球心）
