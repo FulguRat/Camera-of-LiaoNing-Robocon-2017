@@ -111,18 +111,6 @@ int main(int argc, char *argv[])
 	////cv::createTrackbar("trackBar", "TKB", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
 	////trackbarCallback(g_trackbarSlider, 0);
 
-	//cv::namedWindow("TKB");
-	//act::trackbarSet.push_back(act::trackbar("maxH", 255));
-	//act::trackbarSet.push_back(act::trackbar("minH", 255));
-	//act::trackbarSet.push_back(act::trackbar("maxS", 255));
-	//act::trackbarSet.push_back(act::trackbar("minS", 255));
-	//act::trackbarSet.push_back(act::trackbar("maxV", 255));
-	//act::trackbarSet.push_back(act::trackbar("minV", 255));
-	//for (size_t i = 0; i < act::trackbarSet.size(); i++)
-	//{
-	//	cv::createTrackbar(act::trackbarSet.at(i).name, "TKB", &act::slider, act::trackbarSet.at(i).maxValue, act::callback);
-	//}
-
     act::Timestamp timer;
     while (1)
     {

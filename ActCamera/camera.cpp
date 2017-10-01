@@ -486,9 +486,11 @@ void act::Camera::findOptimalAngle(void)
 
 	//send data from serial
 	serialPutchar(act::setFdSerial(), 0xDA);
-	serialPutchar(act::setFdSerial(), (unsigned char)optimalAngle);
-
-	std::cout << "target angle:" << optimalAngle << std::endl;
+	if (noBallFlag == 0)
+	{
+		serialPutchar(act::setFdSerial(), (unsigned char)optimalAngle);
+		std::cout << "target angle:" << optimalAngle << std::endl;
+	}
 }
 
 void act::Camera::getNearestBall(void)
@@ -503,8 +505,6 @@ void act::Camera::getNearestBall(void)
 		CCAng.push_back((unsigned char)(((160 - (int)CCCore.back().x) * 25 / 160) + ANG_ERR));
 		CCDist.push_back((unsigned char)(129.3f * pow(E, -0.05817f  * (double)CCCore.back().y)) +
 			113.6f * pow(E, -0.009029f * (double)CCCore.back().y));
-		//CCDist.push_back((unsigned char)(-0.00022f * pow((float)CCCore.back().y, 3) + 0.06142f * pow((float)CCCore.back().y, 2) -
-		//	6.18f * (float)CCCore.back().y + 281.7f));
 
 		cv::circle(ballPositionImage, CCCore.back(), 5, 255, 1);
 
