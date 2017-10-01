@@ -64,13 +64,13 @@ public:
 
 	void showImage() const
 	{
-		cv::imshow("ORG", originalImage);
+		//cv::imshow("ORG", originalImage);
 		cv::imshow("ORGROI", originalImage(ROIRect));
 		cv::imshow("BSC", basicImage);
-		cv::imshow("AB", allBallImage);
-		cv::imshow("AG", allGreenImage);
-		cv::imshow("FC", fieldCtsImage);
-		cv::imshow("FCH", fieldCHImage);
+		//cv::imshow("AB", allBallImage);
+		//cv::imshow("AG", allGreenImage);
+		//cv::imshow("FC", fieldCtsImage);
+		//cv::imshow("FCH", fieldCHImage);
 		cv::imshow("NoBGB", noBGBallImage);
 		cv::imshow("BP", ballPositionImage);
 	}

@@ -96,9 +96,10 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 
 				//if pix number size up/CC is too far/shape is wrong, push pix num into CCSize, else pop x and y out from CCCore
 				if ((counter < 0.5f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1 ||
-					(xVal.max - xVal.min) * (yVal.max - yVal.min) > 2.5f * (float)counter)
+					((xVal.max - xVal.min) * (yVal.max - yVal.min) > 2.5f * (float)counter) || 
+					((xVal.max - xVal.min) >= 2.4f * (yVal.max - yVal.min)) || ((yVal.max - yVal.min) >= 3.0f * (xVal.max - xVal.min)))
 				{
-					CCCore.pop_back();				
+					CCCore.pop_back();
 				}
 				else
 				{
@@ -118,6 +119,7 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 			counter = 0;
 		}
 	}
+
 	////test reference pix num of specific y
 	//while (!CCSize.empty() && !CCCore.empty())
 	//{
@@ -251,7 +253,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field, may should add orange/red/blue, fix me
-			if (pix[0] > 90 && pix[0] < 140)
+			if (pix[0] > 100 && pix[0] < 170)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
