@@ -88,7 +88,7 @@ public:
 	//scheme 4:send out angle and distance of every ball
 	void calcPosition(void);
 
-	void testThreshold();
+	void testTheshold(int minH, int maxH, int minS, int maxS, int minV, int maxV);
 
 	struct min_max
 	{
@@ -116,6 +116,7 @@ private:
     cv::Mat fieldCHImage;
     cv::Mat noBGBallImage;
 	cv::Mat ballPositionImage;
+	cv::Mat testImage;
 
     cv::Mat ROIImage;
     cv::Rect ROIRect;

@@ -96,8 +96,9 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 
 				//if pix number size up/CC is too far/shape is wrong, push pix num into CCSize, else pop x and y out from CCCore
 				if ((counter < 0.5f * STD_PIXS || counter > 3.0f * STD_PIXS) || farFlag == 1 ||
-					((xVal.max - xVal.min) * (yVal.max - yVal.min) > 2.5f * (float)counter) || 
-					((xVal.max - xVal.min) >= 2.4f * (yVal.max - yVal.min)) || ((yVal.max - yVal.min) >= 3.0f * (xVal.max - xVal.min)))
+					((float)((xVal.max - xVal.min) * (yVal.max - yVal.min)) > 2.5f * (float)counter) || 
+					((float)(xVal.max - xVal.min) >= 2.4f * (float)(yVal.max - yVal.min)) || 
+					((float)(yVal.max - yVal.min) >= 3.0f * (float)(xVal.max - xVal.min)))
 				{
 					CCCore.pop_back();
 				}
@@ -237,7 +238,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[1] < 60 && pix[2] > 185) || pix[2] < 110)
+			if ((pix[1] <= 60 && pix[2] >= 184) || pix[2] <= 144)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -253,7 +254,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field, may should add orange/red/blue, fix me
-			if (pix[0] > 100 && pix[0] < 170)
+			if (pix[0] >= 123 && pix[0] <= 154)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
@@ -596,17 +597,27 @@ void act::Camera::calcPosition(void)
 	std::cout << std::endl;
 }
 
-//test threshold of white/black and green
-void act::Camera::testThreshold()
+
+void act::Camera::testTheshold(int minH, int maxH, int minS, int maxS, int minV, int maxV)
 {
-	update();
+	testImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
+	for (auto i = 0; i < basicImage.rows; i++)
+	{
+		for (auto j = 0; j < basicImage.cols; j++)
+		{
+			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
-	//get basic image for later handle
-	basicImage = originalImage(ROIRect).clone();
-	cv::cvtColor(basicImage, basicImage, CV_BGR2HSV_FULL);
-
-	allBallImage = cv::Mat::zeros(basicImage.rows, basicImage.cols, CV_8UC1);
-
+			//white golf ball & black golf ball
+			if ((pix[0] <= maxH && pix[0] >= minH) && (pix[1] <= maxS && pix[1] >= minS) &&
+				(pix[2] <= maxV && pix[2] >= minV))
+			{
+				*testImage.ptr<uchar>(i, j) = 255;
+			}
+			else
+				*testImage.ptr<uchar>(i, j) = 0;
+		}
+	}
+	imshow("TEST", testImage);
 }
 
 //Fd Get_Set

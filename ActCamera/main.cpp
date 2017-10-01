@@ -20,14 +20,16 @@ const int32_t EXPOSURE_TIME = 300;  //time of exposure
 
 const int32_t CAMERA_NUMBER = 1; //camera number
 
-//////trackbar globe variable and callback function
-////const int g_trackbarMax = 400;
-////int g_trackbarSlider;
-////int g_testValue = 0;
-////void trackbarCallback(int, void*)
-////{
-////	g_testValue = g_trackbarSlider;
-////}
+////trackbar globe variable and callback function
+//const int g_trackbarMax = 255;
+//int g_minHSlider;
+//int g_maxHSlider;
+//int g_minSSlider;
+//int g_maxSSlider;
+//int g_minVSlider;
+//int g_maxVSlider;
+//int g_testValue = 0;
+//void trackbarCallback(int, void*) {}
 
 int main(int argc, char *argv[])
 {
@@ -106,10 +108,19 @@ int main(int argc, char *argv[])
 
 #endif
 
-	////g_trackbarSlider = 0;
-	////cv::namedWindow("TKB");
-	////cv::createTrackbar("trackBar", "TKB", &g_trackbarSlider, g_trackbarMax, trackbarCallback);
-	////trackbarCallback(g_trackbarSlider, 0);
+	//g_minHSlider = 0;
+	//g_maxHSlider = 0;
+	//g_minSSlider = 0;
+	//g_maxSSlider = 0;
+	//g_minVSlider = 0;
+	//g_maxVSlider = 0;
+	//cv::namedWindow("TKB");
+	//cv::createTrackbar("minH", "TKB", &g_minHSlider, g_trackbarMax, trackbarCallback);
+	//cv::createTrackbar("maxH", "TKB", &g_maxHSlider, g_trackbarMax, trackbarCallback);
+	//cv::createTrackbar("minS", "TKB", &g_minSSlider, g_trackbarMax, trackbarCallback);
+	//cv::createTrackbar("maxS", "TKB", &g_maxSSlider, g_trackbarMax, trackbarCallback);
+	//cv::createTrackbar("minV", "TKB", &g_minVSlider, g_trackbarMax, trackbarCallback);
+	//cv::createTrackbar("maxV", "TKB", &g_maxVSlider, g_trackbarMax, trackbarCallback);
 
     act::Timestamp timer;
     while (1)
@@ -120,9 +131,6 @@ int main(int argc, char *argv[])
         __TIMER_START__;
 
 #endif
-
-		//////test part
-		////cam0.setExposureValue(false, g_testValue);
 
 		//update frame
         cam0.update();
@@ -150,6 +158,8 @@ int main(int argc, char *argv[])
 			//send out distance and angle of every golf ball
 			cam0.calcPosition();
 		}
+
+		//cam0.testTheshold(g_minHSlider, g_maxHSlider, g_minSSlider, g_maxSSlider, g_minVSlider, g_maxVSlider);
 
 		//show all images that have been used
 		cam0.showImage();
