@@ -39,6 +39,11 @@ public:
         cv::Mat temp;
         videoCapture >> temp;
         originalImage = temp.clone();
+		for (auto i = 0; i < temp.rows; ++i)
+			for (auto j = 0; j < temp.cols; ++j)
+			{
+				originalImage.ptr<cv::Vec3b>(i)[j] = temp.ptr<cv::Vec3b>(temp.rows - i - 1)[temp.cols - j - 1];
+			}
     }
 
 	//auto set exposure time and white balance
