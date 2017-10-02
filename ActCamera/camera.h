@@ -65,14 +65,14 @@ public:
 	void showImage() const
 	{
 		//cv::imshow("ORG", originalImage);
-		cv::imshow("ORGROI", originalImage(ROIRect));
-		cv::imshow("BSC", basicImage);
+		//cv::imshow("ORGROI", originalImage(ROIRect));
+		//cv::imshow("BSC", basicImage);
 		//cv::imshow("AB", allBallImage);
 		//cv::imshow("AG", allGreenImage);
 		//cv::imshow("FC", fieldCtsImage);
 		//cv::imshow("FCH", fieldCHImage);
 		cv::imshow("NoBGB", noBGBallImage);
-		cv::imshow("BP", ballPositionImage);
+		//cv::imshow("BP", ballPositionImage);
 	}
 
     void getROIImage(cv::Mat &ri) const { ri = ROIImage; }

@@ -238,7 +238,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[1] <= 60 && pix[2] >= 184) || pix[2] <= 144)
+			if ((pix[1] <= 60 && pix[2] >= 169) || pix[2] <= 117)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
