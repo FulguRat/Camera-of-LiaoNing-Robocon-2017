@@ -238,7 +238,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//white golf ball & black golf ball
-			if ((pix[1] <= 60 && pix[2] >= 204) || pix[2] <= 124)
+			if ((pix[1] <= 58 && pix[2] >= 185) || pix[2] <= 92)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -254,7 +254,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field, may should add orange/red/blue, fix me
-			if (pix[0] >= 60 && pix[0] <= 154)
+			if (pix[0] >= 45 && pix[0] <= 132)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
