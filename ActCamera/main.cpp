@@ -22,10 +22,10 @@ const int32_t CAMERA_NUMBER = 1; //camera number
 
 ////trackbar globe variable and callback function
 /////*exposure value*/
-////const int g_trackbarMax = 400;
+////const int g_eTrackbarMax = 400;
 ////int g_expoSlider;
 ///*color theshold*/
-//const int g_trackbarMax = 255;
+//const int g_cTrackbarMax = 255;
 //int g_minHSlider;
 //int g_maxHSlider;
 //int g_minSSlider;
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 	//cv::namedWindow("TKB");
 	/////*exposure value*/
 	////g_expoSlider = 0;
-	////cv::createTrackbar("expoVal", "TKB", &g_expoSlider, g_trackbarMax, trackbarCallback);
+	////cv::createTrackbar("expoVal", "TKB", &g_expoSlider, g_eTrackbarMax, trackbarCallback);
 	///*color theshold*/
 	//g_minHSlider = 0;
 	//g_maxHSlider = 0;
@@ -122,12 +122,12 @@ int main(int argc, char *argv[])
 	//g_maxSSlider = 0;
 	//g_minVSlider = 0;
 	//g_maxVSlider = 0;	
-	//cv::createTrackbar("minH", "TKB", &g_minHSlider, g_trackbarMax, trackbarCallback);
-	//cv::createTrackbar("maxH", "TKB", &g_maxHSlider, g_trackbarMax, trackbarCallback);
-	//cv::createTrackbar("minS", "TKB", &g_minSSlider, g_trackbarMax, trackbarCallback);
-	//cv::createTrackbar("maxS", "TKB", &g_maxSSlider, g_trackbarMax, trackbarCallback);
-	//cv::createTrackbar("minV", "TKB", &g_minVSlider, g_trackbarMax, trackbarCallback);
-	//cv::createTrackbar("maxV", "TKB", &g_maxVSlider, g_trackbarMax, trackbarCallback);
+	//cv::createTrackbar("minH", "TKB", &g_minHSlider, g_cTrackbarMax, trackbarCallback);
+	//cv::createTrackbar("maxH", "TKB", &g_maxHSlider, g_cTrackbarMax, trackbarCallback);
+	//cv::createTrackbar("minS", "TKB", &g_minSSlider, g_cTrackbarMax, trackbarCallback);
+	//cv::createTrackbar("maxS", "TKB", &g_maxSSlider, g_cTrackbarMax, trackbarCallback);
+	//cv::createTrackbar("minV", "TKB", &g_minVSlider, g_cTrackbarMax, trackbarCallback);
+	//cv::createTrackbar("maxV", "TKB", &g_maxVSlider, g_cTrackbarMax, trackbarCallback);
 
     act::Timestamp timer;
     while (1)

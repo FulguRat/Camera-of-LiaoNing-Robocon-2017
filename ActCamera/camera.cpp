@@ -135,8 +135,8 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 
 void act::Camera::autoSet()
 {
-#define MAXBGR_MIN 174
-#define MAXBGR_MAX 180
+#define MAXBGR_MIN 170
+#define MAXBGR_MAX 176
 
 #define REFERAREA_MIN_X 106
 #define REFERAREA_MIN_Y 80
@@ -239,7 +239,7 @@ void act::Camera::getImage()
 
 			//white golf ball & black golf ball
 			//The range of white ball should be as small as possible, and black should be larger
-			if ((pix[1] <= 84 && pix[2] >= 195) || pix[2] <= 103)
+			if ((pix[1] <= 41 && pix[2] >= 180) || pix[2] <= 127)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;
@@ -255,7 +255,7 @@ void act::Camera::getImage()
 			auto pix = basicImage.ptr<cv::Vec3b>(i)[j];
 
 			//green field
-			if (pix[0] >= 45 && pix[0] <= 132 && pix[2] >= 67)
+			if (pix[0] >= 38 && pix[0] <= 133 && pix[2] >= 41)
 				*allGreenImage.ptr<uchar>(i, j) = 255;
 			else
 				*allGreenImage.ptr<uchar>(i, j) = 0;
