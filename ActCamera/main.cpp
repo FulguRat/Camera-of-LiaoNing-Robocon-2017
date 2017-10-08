@@ -8,7 +8,7 @@
 
 //#define MESURE_TIME
 //#define MESURE_TEMPE
-//#define SHUTDOWN_KEY
+#define RESTART_KEY
 
 //calculate time of every circulation
 #define __TIMER_START__ timer.start()
@@ -77,18 +77,19 @@ int main(int argc, char *argv[])
 		printf("Serial init done and fdSerial = %d\n", fdSerial);
 	}
 
-#ifdef SHUTDOWN_KEY
+#ifdef RESTART_KEY
 
-	//use GPIO0 to shutdown the raspberryPi
+	//use GPIO0 to restart program
 	pinMode(0, INPUT);
-	int shutdownCounter = 0;
-	int shutdownFlag = digitalRead(0);
+	int restartCounter = 0;
+	int restartFlag = digitalRead(0);
+
+#endif
 
 	//use GPIO1 AND GPIO2 to control the output
 	pinMode(1, INPUT);
 	pinMode(2, INPUT);
 
-#endif
 
 #ifdef MESURE_TEMPE
 
@@ -205,29 +206,22 @@ int main(int argc, char *argv[])
 
 #endif
 
-#ifdef SHUTDOWN_KEY
+#ifdef RESTART_KEY
 
-		//if GPIO1 change its voltage, shutdown the raspberryPi
-		if (digitalRead(0) == shutdownFlag)
+		//if GPIO1 change its voltage, restart the camera
+		if (digitalRead(0) == restartFlag)
 		{
-			shutdownCounter = 0;
+			restartCounter = 0;
 		}
 		else
 		{
-			shutdownCounter++;
+			restartCounter++;
 		}
 
-		if (shutdownCounter >= 3)
+		if (restartCounter >= 3)
 		{
-			if (system("shutdown -h now") == 1)
-			{
-				std::cout << "ready for shutdown" << std::endl;
-			}
-			else
-			{
-				std::cout << "shutdown failed!" << std::endl;
-			}
-			shutdownCounter = 0;
+			break;
+			restartCounter = 0;
 		}
 
 #endif

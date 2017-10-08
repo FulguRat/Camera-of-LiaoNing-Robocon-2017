@@ -76,8 +76,8 @@ void act::Camera::findConnectedComponents(cv::Mat &binary)
 				//row_1
 				if (col_0 >= 0 && bin.ptr(row_1)[col_0] == 255)
 					__pass__(col_0, row_1);
-				if (col_2 < bin.cols && bin.ptr(row_1)[col_1] == 255)
-					__pass__(col_1, row_1);
+				if (col_2 < bin.cols && bin.ptr(row_1)[col_2] == 255)
+					__pass__(col_2, row_1);
 				//row_2
 				if (row_2 < bin.rows && col_0 >= 0 && bin.ptr(row_2)[col_0] == 255)
 					__pass__(col_0, row_2);
@@ -239,7 +239,7 @@ void act::Camera::getImage()
 
 			//white golf ball & black golf ball
 			//The range of white ball should be as small as possible, and black should be larger
-			if ((pix[1] <= 41 && pix[2] >= 180) || pix[2] <= 127)
+			if ((pix[1] <= 24 && pix[2] >= 190) || pix[2] <= 127)
 				*allBallImage.ptr<uchar>(i, j) = 255;
 			else
 				*allBallImage.ptr<uchar>(i, j) = 0;

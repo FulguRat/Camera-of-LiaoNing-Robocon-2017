@@ -1,0 +1,163 @@
+----------------------------------------
+#sudo no passwd
+
+sudo nano /etc/sudoers
+
+knight ALL=(ALL) NOPASSWD: ALL
+
+----------------------------------------
+#open SSH and Serial
+
+sudo raspi-config
+
+interfaces -> SSH -> yes
+interfaces -> Serial -> No -> Yes
+
+----------------------------------------
+#change USTC source
+
+sudo nano /etc/apt/sources.list
+http://mirrors.ustc.edu.cn/ubuntu-ports/
+
+sudo apt-get update
+sudo apt-get upgrade
+
+----------------------------------------
+#enable HDMI hot plug
+
+sudo nano /boot/config.txt
+
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=35
+
+----------------------------------------
+#enable serial
+
+sudo nano /boot/config.txt
+
+dtoverlay=pi3-miniuart-bt
+force_turbo=1
+enable_uart=1
+
+sudo nano /boot/cmdline.txt
+
+overlay the file by follows:
+
+dwc_otg.lpm_enable=0 console=serial1,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait quiet splash plymouth.ignore-serial-consoles
+
+sudo systemctl disable hciuart
+
+sudo nano /lib/systemd/system/hciuart.service
+change all "ttyAMA0(serial1)" to "ttyS0"
+
+sudo apt-get update
+sudo apt-get upgrade
+sudo reboot
+
+----------------------------------------
+#install opencv2.4.13
+
+sudo apt-get update  
+sudo apt-get upgrade  
+
+sudo apt-get remove ffmpeg x264-dev  
+
+sudo apt-get install ocl-icd-libopencl1 build-essential checkinstall cmake pkg-config yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libxine2-dev libgstreamer0.10-dev  libgstreamer-plugins-base0.10-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils
+
+mkdir opencv  
+cd opencv  
+
+wget -O opencv-2.4.13.zip http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.4.13/opencv-2.4.13.zip/download  
+unzip opencv-2.4.13.zip  
+cd opencv-2.4.13
+
+mkdir build  
+cd build  
+
+cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON -D WITH_QT=ON -D WITH_OPENGL=ON ..  
+
+make  
+sudo make install  
+sudo sh -c 'echo "/usr/local/lib">/etc/ld.so.conf.d/opencv.conf'  
+sudo ldconfig  
+
+sudo shutdown -r now
+
+----------------------------------------
+#install opencv3 + contrib
+
+sudo apt-get remove ffmpeg x264-dev  
+
+sudo apt-get install ocl-icd-libopencl1 build-essential checkinstall cmake pkg-config yasm libjpeg-dev libjasper-dev libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev libxine2-dev libgstreamer0.10-dev  libgstreamer-plugins-base0.10-dev libv4l-dev python-dev python-numpy libtbb-dev libqt4-dev libgtk2.0-dev libfaac-dev libmp3lame-dev libopencore-amrnb-dev libopencore-amrwb-dev libtheora-dev libvorbis-dev libxvidcore-dev x264 v4l-utils
+
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+
+mkdir opencv
+cd opencv
+
+git clone https://github.com/Itseez/opencv.git
+git clone https://github.com/Itseez/opencv_contrib.git
+(maybe need "export GIT_SSL_NO_VERIFY=1" in terminal)
+
+rename "opencv" to "opencv3"
+
+cp -r opencv_contrib opencv3
+cd opencv3
+
+mkdir build
+cd build
+
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D BUILD_EXAMPLES=ON -D WITH_OPENGL=ON -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib/modules/ ..
+
+make
+sudo make install
+sudo sh -c 'echo "/usr/local/lib">/etc/ld.so.conf.d/opencv.conf'  
+sudo ldconfig  
+
+sudo nano /etc/bash.bashrc
+PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/loacl/lib/pkgconfig
+export PKG_CONFIG_PATH
+sudo source /etc/bash.bashrc
+
+pkg-config opencv --cflags --libs
+
+sudo shutdown -r now
+
+if there are problem with QT
+sudo nano /etc/environment
+QT_X11_NO_MITSHM=1
+
+----------------------------------------
+#MoveOut.sh
+
+#!/bin/bash
+cp ./projects/ActCamera/bin/ARM/Release/ActCamera.out ./
+sudo chmod 777 /dev/ttyAMA0
+/home/knight/ActCamera.out
+
+----------------------------------------
+#AutoStart.sh
+
+#!/bin/bash
+sudo chmod 777 /dev/ttyAMA0
+while true
+do
+	isexcuted=$(ps aux|grep Actcamera.out|grep -v grep)
+	if ["$isexcuted" = ""];then
+	mate-terminal -e "/home/knight/ActCamera.out"
+	fi
+	sheep 1s
+done
+
+----------------------------------------
+#start AutoStart.sh when boot raspberryPi
+
+mate-session-properties
+
+add a new entry as follow
+Name: Camera Autostart
+command: home/knight/AutoStart.sh
+comment: camera autostart
+
